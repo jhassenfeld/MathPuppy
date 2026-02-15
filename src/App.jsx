@@ -1,0 +1,2158 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const MODES = {
+  addSub20: {
+    id: 'addSub20',
+    name: '➕➖ Easy Math',
+    description: '⭐',
+    inputType: 'grid',
+    maxDigits: 2,
+  },
+  doubleDigit: {
+    id: 'doubleDigit',
+    name: '➕➖ Big Numbers',
+    description: '⭐⭐',
+    inputType: 'numpad',
+    maxDigits: 3,
+  },
+  multFacts: {
+    id: 'multFacts',
+    name: '✖️ Times Tables',
+    description: '⭐⭐⭐',
+    inputType: 'numpad',
+    maxDigits: 3,
+  },
+  mentalMult: {
+    id: 'mentalMult',
+    name: '🧠 Mental Multiplication',
+    description: '⭐⭐⭐⭐',
+    inputType: 'numpad',
+    maxDigits: 4,
+  },
+};
+
+const PROBLEMS_PER_WAVE = 9;
+const FALL_DURATION = 10000;
+const PERFECT_TIME = 2000;
+const PAUSE_BETWEEN = 500;
+
+const FRUITS = [
+  { name: 'apple', color: '#ef4444', emoji: '🍎' },
+  { name: 'orange', color: '#f97316', emoji: '🍊' },
+  { name: 'watermelon', color: '#22c55e', emoji: '🍉' },
+  { name: 'grape', color: '#a855f7', emoji: '🍇' },
+  { name: 'banana', color: '#eab308', emoji: '🍌' },
+  { name: 'strawberry', color: '#ec4899', emoji: '🍓' },
+];
+
+const SHOP_ITEMS = {
+  // Necessities
+  food_bowl: { name: 'Food Bowl', cost: 50, category: 'necessities', effect: 'Feed your puppy!', icon: '🥣', oneTime: true },
+  water_bowl: { name: 'Water Bowl', cost: 50, category: 'necessities', effect: 'Give your puppy water!', icon: '🥤', oneTime: true },
+  bed: { name: 'Bed', cost: 80, category: 'necessities', effect: 'Puppy stays happy longer!', icon: '🛏️', oneTime: true },
+
+  // Upgrades
+  premium_food_bowl: { name: 'Fancy Food Bowl', cost: 150, category: 'upgrades', effect: 'Better food for puppy!', icon: '🍽️', oneTime: true, requires: 'food_bowl' },
+  premium_water_bowl: { name: 'Fancy Water Bowl', cost: 150, category: 'upgrades', effect: 'Better water for puppy!', icon: '🏺', oneTime: true, requires: 'water_bowl' },
+  cozy_bed: { name: 'Cozy Bed', cost: 200, category: 'upgrades', effect: 'Super comfy! 🐶😴', icon: '🛋️', oneTime: true, requires: 'bed' },
+  treat_bag: { name: 'Treat Bag', cost: 120, category: 'upgrades', effect: 'Give treats! 🦴', icon: '🎒', oneTime: true },
+  toy_ball: { name: 'Toy Ball', cost: 100, category: 'upgrades', effect: 'Puppy loves to play! 😊', icon: '⚾', oneTime: true },
+  chew_rope: { name: 'Chew Rope', cost: 100, category: 'upgrades', effect: 'More fun for puppy! 😊', icon: '🪢', oneTime: true },
+
+  // Consumables
+  basic_kibble: { name: 'Kibble', cost: 20, category: 'consumables', effect: '🍖 → 🐶😋', icon: '🍖', oneTime: false, requires: 'food_bowl', stat: 'hunger', amount: 30 },
+  premium_kibble: { name: 'Yummy Kibble', cost: 35, category: 'consumables', effect: '🥩 → 🐶🤤', icon: '🥩', oneTime: false, requires: 'premium_food_bowl', stat: 'hunger', amount: 50 },
+  water: { name: 'Water', cost: 15, category: 'consumables', effect: '💧 → 🐶😊', icon: '💧', oneTime: false, requires: 'water_bowl', stat: 'thirst', amount: 30 },
+  spring_water: { name: 'Spring Water', cost: 25, category: 'consumables', effect: '🫗 → 🐶😍', icon: '🫗', oneTime: false, requires: 'premium_water_bowl', stat: 'thirst', amount: 50 },
+  treat: { name: 'Treat', cost: 10, category: 'consumables', effect: '🦴 → 🐶💕', icon: '🦴', oneTime: false, requires: 'treat_bag', stat: 'treat', hungerAmt: 15, happyAmt: 5 },
+
+  // Accessories
+  bandana: { name: 'Bandana', cost: 80, category: 'accessories', effect: 'So cute! 😊', icon: '🎀', oneTime: true, happinessBoost: 5 },
+  collar_bell: { name: 'Bell Collar', cost: 100, category: 'accessories', effect: 'Jingle jingle! 🔔', icon: '🔔', oneTime: true, happinessBoost: 5 },
+  bow_tie: { name: 'Bow Tie', cost: 120, category: 'accessories', effect: 'Fancy puppy! 🎩', icon: '🎩', oneTime: true, happinessBoost: 6 },
+  ninja_headband: { name: 'Ninja Headband', cost: 150, category: 'accessories', effect: 'Ninja puppy! 🥋', icon: '🥋', oneTime: true, happinessBoost: 8 },
+  sneakers: { name: 'Sneakers', cost: 180, category: 'accessories', effect: 'Fast puppy! 👟', icon: '👟', oneTime: true, happinessBoost: 8 },
+  sunglasses: { name: 'Sunglasses', cost: 200, category: 'accessories', effect: 'Cool puppy! 😎', icon: '😎', oneTime: true, happinessBoost: 10 },
+  cape: { name: 'Cape', cost: 250, category: 'accessories', effect: 'Super puppy! 🦸', icon: '🦸', oneTime: true, happinessBoost: 10 },
+  tiny_sword: { name: 'Ninja Sword', cost: 300, category: 'accessories', effect: 'Warrior puppy! ⚔️', icon: '⚔️', oneTime: true, happinessBoost: 12 },
+  ninja_mask: { name: 'Ninja Mask', cost: 350, category: 'accessories', effect: 'Sneaky puppy! 🎭', icon: '🎭', oneTime: true, happinessBoost: 12 },
+  crown: { name: 'Crown', cost: 400, category: 'accessories', effect: 'Royal puppy! 👑', icon: '👑', oneTime: true, happinessBoost: 15 },
+  painted_house: { name: 'Pretty House', cost: 400, category: 'accessories', effect: 'New room! 🏠', icon: '🏠', oneTime: true, happinessBoost: 15, roomTheme: 'painted' },
+  full_ninja_outfit: { name: 'Ninja Outfit', cost: 500, category: 'accessories', effect: 'Full ninja! 🥷', icon: '🥷', oneTime: true, happinessBoost: 20 },
+  ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'accessories', effect: 'Ninja home! ⛩️', icon: '⛩️', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
+};
+
+const DEFAULT_STATE = {
+  coins: 0,
+  pet: {
+    hunger: 80,
+    thirst: 80,
+    happiness: 80,
+    purchasedItems: [],
+    roomTheme: 'default',
+  },
+  progress: {
+    addSub20: { currentWave: 1, highScore: 0, bestStreak: 0 },
+    doubleDigit: { currentWave: 1, highScore: 0, bestStreak: 0 },
+    multFacts: { currentWave: 1, highScore: 0, bestStreak: 0 },
+    mentalMult: { currentWave: 1, highScore: 0, bestStreak: 0 },
+  },
+};
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('mathNinjaState');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return { ...DEFAULT_STATE, ...parsed, pet: { ...DEFAULT_STATE.pet, ...parsed.pet }, progress: { ...DEFAULT_STATE.progress, ...parsed.progress } };
+    }
+  } catch (e) { /* ignore */ }
+  return { ...DEFAULT_STATE };
+}
+
+function saveState(state) {
+  try {
+    localStorage.setItem('mathNinjaState', JSON.stringify(state));
+  } catch (e) { /* ignore */ }
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randomFruit() {
+  return FRUITS[Math.floor(Math.random() * FRUITS.length)];
+}
+
+// ============================================================================
+// PROBLEM GENERATION
+// ============================================================================
+
+let lastProblem = null;
+
+function generateProblem(mode, wave) {
+  let problem;
+  let attempts = 0;
+  do {
+    problem = generateProblemInner(mode, wave);
+    attempts++;
+  } while (
+    attempts < 20 &&
+    lastProblem &&
+    lastProblem.num1 === problem.num1 &&
+    lastProblem.num2 === problem.num2 &&
+    lastProblem.operator === problem.operator
+  );
+  lastProblem = problem;
+  return problem;
+}
+
+function generateProblemInner(mode, wave) {
+  switch (mode) {
+    case 'addSub20': return genAddSub20(wave);
+    case 'doubleDigit': return genDoubleDigit(wave);
+    case 'multFacts': return genMultFacts(wave);
+    case 'mentalMult': return genMentalMult(wave);
+    default: return genAddSub20(wave);
+  }
+}
+
+function genAddSub20(wave) {
+  if (wave === 1) {
+    const a = randInt(1, 5), b = randInt(1, 10 - a);
+    return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+  } else if (wave === 2) {
+    const a = randInt(3, 10), b = randInt(1, a);
+    return { num1: a, num2: b, operator: '−', correctAnswer: a - b };
+  } else if (wave === 3) {
+    if (Math.random() < 0.5) {
+      const a = randInt(1, 5), b = randInt(1, 10 - a);
+      return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+    } else {
+      const a = randInt(3, 10), b = randInt(1, a);
+      return { num1: a, num2: b, operator: '−', correctAnswer: a - b };
+    }
+  } else if (wave === 4) {
+    const a = randInt(3, 12), b = randInt(Math.max(1, 11 - a), Math.min(12, 20 - a));
+    return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+  } else if (wave === 5) {
+    const ans = randInt(11, 20), b = randInt(3, Math.min(ans, 12));
+    return { num1: ans, num2: b, operator: '−', correctAnswer: ans - b };
+  } else {
+    if (Math.random() < 0.5) {
+      const a = randInt(1, 12), b = randInt(1, 20 - a);
+      return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+    } else {
+      const a = randInt(2, 20), b = randInt(1, a);
+      return { num1: a, num2: b, operator: '−', correctAnswer: a - b };
+    }
+  }
+}
+
+function genDoubleDigit(wave) {
+  if (wave === 1) {
+    const a = randInt(11, 89), b = randInt(1, 9 - (a % 10 > 0 ? 0 : 0));
+    const b2 = randInt(1, 9 - (a % 10));
+    return { num1: a, num2: Math.max(1, b2), operator: '+', correctAnswer: a + Math.max(1, b2) };
+  } else if (wave === 2) {
+    const a = randInt(12, 99), b = randInt(1, Math.min(a % 10, 9));
+    return { num1: a, num2: Math.max(1, b), operator: '−', correctAnswer: a - Math.max(1, b) };
+  } else if (wave === 3) {
+    const a = randInt(11, 89);
+    const maxB = Math.min(9, 99 - a);
+    const b = randInt(10 - (a % 10), maxB);
+    return { num1: a, num2: Math.max(1, b), operator: '+', correctAnswer: a + Math.max(1, b) };
+  } else if (wave === 4) {
+    const a = randInt(20, 91);
+    const b = randInt((a % 10) + 1, 9);
+    return { num1: a, num2: Math.min(b, 9), operator: '−', correctAnswer: a - Math.min(b, 9) };
+  } else if (wave === 5) {
+    const a = randInt(11, 59), b = randInt(10, 99 - a);
+    const tensOk = (a % 10) + (b % 10) < 10;
+    if (tensOk) return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+    return { num1: randInt(21, 45), num2: randInt(11, 43), operator: '+', correctAnswer: 0 };
+  } else if (wave === 6) {
+    const b = randInt(10, 49), a = randInt(b + 10, 99);
+    return { num1: a, num2: b, operator: '−', correctAnswer: a - b };
+  } else if (wave === 7) {
+    const a = randInt(15, 65), b = randInt(15, 99 - a);
+    return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+  } else {
+    if (Math.random() < 0.5) {
+      const a = randInt(11, 70), b = randInt(10, 99 - a);
+      return { num1: a, num2: b, operator: '+', correctAnswer: a + b };
+    } else {
+      const b = randInt(10, 50), a = randInt(b + 5, 99);
+      return { num1: a, num2: b, operator: '−', correctAnswer: a - b };
+    }
+  }
+}
+
+function genMultFacts(wave) {
+  let factors;
+  if (wave === 1) factors = [1, 2];
+  else if (wave === 2) factors = [3, 4];
+  else if (wave === 3) factors = [5, 10];
+  else if (wave === 4) factors = [6, 7];
+  else if (wave === 5) factors = [8, 9];
+  else if (wave === 6) factors = [11, 12];
+  else factors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+  const a = factors[Math.floor(Math.random() * factors.length)];
+  const b = randInt(1, 12);
+  return { num1: a, num2: b, operator: '×', correctAnswer: a * b };
+}
+
+function genMentalMult(wave) {
+  let factors;
+  if (wave === 1) factors = [2, 3];
+  else if (wave === 2) factors = [4, 5];
+  else if (wave === 3) factors = [6, 7];
+  else if (wave === 4) factors = [8, 9];
+  else factors = [2, 3, 4, 5, 6, 7, 8, 9];
+
+  const b = factors[Math.floor(Math.random() * factors.length)];
+  const a = randInt(11, 99);
+  return { num1: a, num2: b, operator: '×', correctAnswer: a * b };
+}
+
+// Fix wave 5 double digit issue
+function fixProblem(p) {
+  if (p.correctAnswer === 0 && p.operator === '+') {
+    p.correctAnswer = p.num1 + p.num2;
+  }
+  return p;
+}
+
+// ============================================================================
+// STYLES
+// ============================================================================
+
+const styles = {
+  app: {
+    fontFamily: "'Nunito', 'Fredoka One', sans-serif",
+    width: '100%',
+    minHeight: '100vh',
+    background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
+    color: '#ffffff',
+    overflow: 'hidden',
+    position: 'relative',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    touchAction: 'manipulation',
+  },
+  stars: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+    zIndex: 0,
+  },
+  container: {
+    position: 'relative',
+    zIndex: 1,
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '0 16px',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+};
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+// --- Star Background ---
+function StarBackground() {
+  const stars = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      size: Math.random() * 2 + 1,
+      delay: Math.random() * 3,
+      duration: Math.random() * 2 + 2,
+    }));
+  }, []);
+
+  return (
+    <div style={styles.stars}>
+      {stars.map(s => (
+        <div key={s.id} style={{
+          position: 'absolute',
+          left: `${s.left}%`,
+          top: `${s.top}%`,
+          width: `${s.size}px`,
+          height: `${s.size}px`,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: 0.6,
+          animation: `twinkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+// --- Coin Display ---
+function CoinDisplay({ coins, flash }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '6px 14px',
+      background: flash ? 'rgba(245, 158, 11, 0.4)' : 'rgba(245, 158, 11, 0.2)',
+      borderRadius: '20px',
+      fontSize: '20px',
+      fontWeight: 700,
+      transition: 'background 0.3s',
+    }}>
+      <span style={{ fontSize: '22px' }}>🪙</span>
+      <span style={{ color: '#fef3c7' }}>{coins}</span>
+    </div>
+  );
+}
+
+// --- Title Screen ---
+function TitleScreen({ gameState, onSelectMode, onVisitPuppy }) {
+  return (
+    <div style={{ ...styles.container, justifyContent: 'center', alignItems: 'center', padding: '20px 16px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{
+          fontFamily: "'Fredoka One', 'Nunito', sans-serif",
+          fontSize: 'clamp(36px, 8vw, 56px)',
+          margin: '0 0 4px 0',
+          background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textShadow: 'none',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+        }}>
+          Math Ninja
+        </h1>
+        <div style={{ fontSize: '32px', marginBottom: '8px' }}>🐕‍🦺⚔️</div>
+        <CoinDisplay coins={gameState.coins} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '500px' }}>
+        {Object.values(MODES).map(mode => {
+          const prog = gameState.progress[mode.id];
+          return (
+            <button
+              key={mode.id}
+              onClick={() => onSelectMode(mode.id)}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '2px solid rgba(255,255,255,0.15)',
+                borderRadius: '16px',
+                padding: '16px 20px',
+                color: '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.2s',
+                fontFamily: 'inherit',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              <div style={{ fontWeight: 800, fontSize: '18px', marginBottom: '4px' }}>{mode.name}</div>
+              <div style={{ fontSize: '14px', opacity: 0.7, marginBottom: '6px' }}>{mode.description}</div>
+              <div style={{ fontSize: '13px', color: '#f59e0b' }}>
+                🌊 {prog.currentWave} &nbsp; 🔥 {prog.bestStreak} &nbsp; 🏆 {prog.highScore}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={onVisitPuppy}
+        style={{
+          marginTop: '20px',
+          padding: '14px 32px',
+          background: 'linear-gradient(135deg, #ec4899, #a855f7)',
+          border: 'none',
+          borderRadius: '30px',
+          color: '#fff',
+          fontSize: '18px',
+          fontWeight: 700,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
+        }}
+      >
+        🐶 My Puppy
+      </button>
+    </div>
+  );
+}
+
+// --- Answer Grid (0-20) ---
+function AnswerGrid({ onAnswer, disabledNums, flashGreen, flashRed }) {
+  const row1 = Array.from({ length: 11 }, (_, i) => i);
+  const row2 = Array.from({ length: 10 }, (_, i) => i + 11);
+
+  const renderBtn = (num) => {
+    const isGreen = flashGreen === num;
+    const isRed = flashRed === num;
+    const isDisabled = disabledNums.includes(num);
+    return (
+      <button
+        key={num}
+        onClick={() => !isDisabled && onAnswer(num)}
+        disabled={isDisabled}
+        style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '10px',
+          border: '2px solid rgba(255,255,255,0.2)',
+          background: isGreen ? '#22c55e' : isRed ? '#ef4444' : isDisabled ? 'rgba(255,255,255,0.05)' : 'rgba(139, 92, 42, 0.6)',
+          color: isDisabled ? 'rgba(255,255,255,0.3)' : '#fff',
+          fontSize: '18px',
+          fontWeight: 700,
+          cursor: isDisabled ? 'default' : 'pointer',
+          fontFamily: 'inherit',
+          transition: 'all 0.15s',
+          animation: isRed ? 'shake 0.3s' : 'none',
+          boxShadow: isGreen ? '0 0 20px rgba(34,197,94,0.6)' : isRed ? '0 0 20px rgba(239,68,68,0.6)' : '0 2px 4px rgba(0,0,0,0.3)',
+        }}
+      >
+        {num}
+      </button>
+    );
+  };
+
+  return (
+    <div style={{
+      background: 'rgba(0,0,0,0.4)',
+      backdropFilter: 'blur(10px)',
+      borderTop: '3px solid rgba(139, 92, 42, 0.5)',
+      padding: '12px 8px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '8px',
+    }}>
+      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {row1.map(renderBtn)}
+      </div>
+      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {row2.map(renderBtn)}
+      </div>
+    </div>
+  );
+}
+
+// --- Number Pad (side-mounted, transparent) ---
+function NumberPad({ value, onChange, onSubmit, maxDigits, flashState }) {
+  const handleDigit = (d) => {
+    if (value.length < maxDigits) onChange(value + d);
+  };
+  const handleBackspace = () => onChange(value.slice(0, -1));
+
+  const btnStyle = {
+    width: '64px',
+    height: '56px',
+    borderRadius: '12px',
+    border: '2px solid rgba(255,255,255,0.15)',
+    background: 'rgba(139, 92, 42, 0.45)',
+    color: '#fff',
+    fontSize: '24px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    transition: 'all 0.1s',
+    backdropFilter: 'blur(4px)',
+  };
+
+  return (
+    <div style={{
+      padding: '8px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '6px',
+    }}>
+      {/* Answer display */}
+      <div style={{
+        width: '100%',
+        height: '48px',
+        background: flashState === 'correct' ? 'rgba(34,197,94,0.7)' : flashState === 'wrong' ? 'rgba(239,68,68,0.7)' : 'rgba(139, 92, 42, 0.35)',
+        borderRadius: '12px',
+        border: '2px solid rgba(255,255,255,0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '28px',
+        fontWeight: 700,
+        letterSpacing: '4px',
+        animation: flashState === 'wrong' ? 'shake 0.3s' : 'none',
+        transition: 'background 0.2s',
+        backdropFilter: 'blur(4px)',
+      }}>
+        {value || <span style={{ opacity: 0.3 }}>?</span>}
+      </div>
+
+      {/* Number grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 64px)', gap: '6px' }}>
+        {[7,8,9,4,5,6,1,2,3].map(d => (
+          <button key={d} onClick={() => handleDigit(String(d))} style={btnStyle}>{d}</button>
+        ))}
+      </div>
+
+      {/* Bottom row: 0, backspace, enter */}
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button onClick={() => handleDigit('0')} style={btnStyle}>0</button>
+        <button onClick={handleBackspace} style={{ ...btnStyle, fontSize: '20px', background: 'rgba(100,100,100,0.35)' }}>⌫</button>
+        <button onClick={onSubmit} style={{
+          ...btnStyle,
+          background: 'rgba(34, 197, 94, 0.5)',
+          fontSize: '20px',
+        }}>
+          ✓
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- Particles ---
+function Particles({ particles }) {
+  return (
+    <>
+      {particles.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute',
+          left: `${p.x}px`,
+          top: `${p.y}px`,
+          width: `${p.size}px`,
+          height: `${p.size}px`,
+          borderRadius: '50%',
+          background: p.color,
+          opacity: p.opacity,
+          pointerEvents: 'none',
+          zIndex: 10,
+          transition: 'none',
+        }} />
+      ))}
+    </>
+  );
+}
+
+// --- Gameplay Screen ---
+function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, onBack }) {
+  const modeConfig = MODES[mode];
+  const [problemIndex, setProblemIndex] = useState(0);
+  const [problem, setProblem] = useState(() => fixProblem(generateProblem(mode, wave)));
+  const [fruit, setFruit] = useState(randomFruit);
+  const [fruitY, setFruitY] = useState(0);
+  const [fruitX] = useState(() => randInt(-40, 40));
+  const [fruitRotation, setFruitRotation] = useState(0);
+  const [numpadValue, setNumpadValue] = useState('');
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [perfectCount, setPerfectCount] = useState(0);
+  const [coinsEarned, setCoinsEarned] = useState(0);
+  const [disabledNums, setDisabledNums] = useState([]);
+  const [gridFlashGreen, setGridFlashGreen] = useState(null);
+  const [gridFlashRed, setGridFlashRed] = useState(null);
+  const [numpadFlash, setNumpadFlash] = useState(null);
+  const [sliceActive, setSliceActive] = useState(false);
+  const [sliceY, setSliceY] = useState(0);
+  const [splatActive, setSplatActive] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(null);
+  const [isPerfect, setIsPerfect] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [particles, setParticles] = useState([]);
+  const [coinFlash, setCoinFlash] = useState(false);
+  const [perfectText, setPerfectText] = useState(false);
+
+  const startTimeRef = useRef(Date.now());
+  const animFrameRef = useRef(null);
+  const playAreaRef = useRef(null);
+  const problemActiveRef = useRef(true);
+  const particleIdRef = useRef(0);
+  const streakRef = useRef(0);
+
+  useEffect(() => { streakRef.current = streak; }, [streak]);
+
+  // Fruit falling animation
+  useEffect(() => {
+    if (paused) return;
+    const startTime = Date.now();
+    startTimeRef.current = startTime;
+    problemActiveRef.current = true;
+
+    const animate = () => {
+      if (!problemActiveRef.current) return;
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / FALL_DURATION, 1);
+      setFruitY(progress * 100);
+      setFruitRotation(progress * 180);
+
+      if (progress >= 1) {
+        handleTimeout();
+        return;
+      }
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+    animFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [problemIndex, paused]);
+
+  const spawnParticles = (y, color, count = 10) => {
+    const area = playAreaRef.current;
+    if (!area) return;
+    const centerX = area.offsetWidth / 2;
+    const newParticles = Array.from({ length: count }, () => {
+      const id = particleIdRef.current++;
+      return {
+        id,
+        x: centerX + randInt(-30, 30),
+        y: (y / 100) * (area.offsetHeight - 60) + 30,
+        vx: (Math.random() - 0.5) * 8,
+        vy: (Math.random() - 0.5) * 8 - 3,
+        size: randInt(6, 14),
+        color,
+        opacity: 1,
+      };
+    });
+    setParticles(prev => [...prev, ...newParticles]);
+
+    // Animate particles
+    let frame = 0;
+    const animateParticles = () => {
+      frame++;
+      setParticles(prev => prev.map(p => {
+        if (!newParticles.find(np => np.id === p.id)) return p;
+        return {
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy + frame * 0.3,
+          opacity: Math.max(0, p.opacity - 0.03),
+        };
+      }).filter(p => p.opacity > 0));
+      if (frame < 30) requestAnimationFrame(animateParticles);
+    };
+    requestAnimationFrame(animateParticles);
+  };
+
+  const handleCorrect = (answerTime) => {
+    if (!problemActiveRef.current) return;
+    problemActiveRef.current = false;
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+
+    const perfect = answerTime < PERFECT_TIME;
+    const currentSliceY = fruitY;
+
+    setSliceActive(true);
+    setSliceY(currentSliceY);
+    setIsPerfect(perfect);
+
+    const earnedCoins = 5 + (perfect ? 5 : 0);
+    setCoinsEarned(prev => prev + earnedCoins);
+    setScore(prev => prev + (perfect ? 20 : 10));
+    setCorrectCount(prev => prev + 1);
+    if (perfect) {
+      setPerfectCount(prev => prev + 1);
+      setPerfectText(true);
+      setTimeout(() => setPerfectText(false), 1000);
+    }
+
+    const newStreak = streakRef.current + 1;
+    setStreak(newStreak);
+    setBestStreak(prev => Math.max(prev, newStreak));
+    setCoinFlash(true);
+    setTimeout(() => setCoinFlash(false), 300);
+
+    spawnParticles(currentSliceY, fruit.color, perfect ? 20 : 10);
+
+    setTimeout(() => {
+      setSliceActive(false);
+      nextProblem();
+    }, 800);
+  };
+
+  const handleWrong = () => {
+    setStreak(0);
+    streakRef.current = 0;
+  };
+
+  const handleTimeout = () => {
+    if (!problemActiveRef.current) return;
+    problemActiveRef.current = false;
+
+    setSplatActive(true);
+    setShowAnswer(problem.correctAnswer);
+    setStreak(0);
+    streakRef.current = 0;
+
+    spawnParticles(100, fruit.color, 8);
+
+    setTimeout(() => {
+      setSplatActive(false);
+      setShowAnswer(null);
+      nextProblem();
+    }, 2000);
+  };
+
+  const nextProblem = () => {
+    const next = problemIndex + 1;
+    if (next >= PROBLEMS_PER_WAVE) {
+      finishWave();
+      return;
+    }
+    setProblemIndex(next);
+    setProblem(fixProblem(generateProblem(mode, wave)));
+    setFruit(randomFruit());
+    setFruitY(0);
+    setNumpadValue('');
+    setDisabledNums([]);
+    setGridFlashGreen(null);
+    setGridFlashRed(null);
+    setNumpadFlash(null);
+  };
+
+  const finishWave = () => {
+    const baseCoins = 50;
+    const answerCoins = coinsEarned;
+    const accuracyBonus = (correctCount / PROBLEMS_PER_WAVE) >= 0.9 ? 20 : 0;
+    const streakBonus = bestStreak * 2;
+    const totalCoins = baseCoins + answerCoins + accuracyBonus + streakBonus;
+
+    // Decay pet meters
+    const decayMult = gameState.pet.purchasedItems.includes('cozy_bed') ? 0.65 : gameState.pet.purchasedItems.includes('bed') ? 0.8 : 1;
+    const happyPassive = (gameState.pet.purchasedItems.includes('toy_ball') ? 2 : 0) + (gameState.pet.purchasedItems.includes('chew_rope') ? 2 : 0);
+
+    const newState = {
+      ...gameState,
+      coins: gameState.coins + totalCoins,
+      pet: {
+        ...gameState.pet,
+        hunger: Math.max(0, gameState.pet.hunger - 12 * decayMult),
+        thirst: Math.max(0, gameState.pet.thirst - 12 * decayMult),
+        happiness: Math.min(100, Math.max(0, gameState.pet.happiness - 5 * decayMult + happyPassive)),
+      },
+      progress: {
+        ...gameState.progress,
+        [mode]: {
+          currentWave: Math.max(gameState.progress[mode].currentWave, wave + 1),
+          highScore: Math.max(gameState.progress[mode].highScore, score),
+          bestStreak: Math.max(gameState.progress[mode].bestStreak, bestStreak),
+        },
+      },
+    };
+
+    setGameState(newState);
+    saveState(newState);
+
+    onWaveComplete({
+      wave,
+      score,
+      correctCount,
+      totalProblems: PROBLEMS_PER_WAVE,
+      perfectCount,
+      bestStreak,
+      coinsEarned: totalCoins,
+      accuracy: Math.round((correctCount / PROBLEMS_PER_WAVE) * 100),
+    });
+  };
+
+  // Grid answer handler
+  const handleGridAnswer = (num) => {
+    if (!problemActiveRef.current) return;
+    const elapsed = Date.now() - startTimeRef.current;
+    if (num === problem.correctAnswer) {
+      setGridFlashGreen(num);
+      setTimeout(() => setGridFlashGreen(null), 500);
+      handleCorrect(elapsed);
+    } else {
+      setGridFlashRed(num);
+      setTimeout(() => setGridFlashRed(null), 400);
+      setDisabledNums(prev => [...prev, num]);
+      handleWrong();
+    }
+  };
+
+  // Numpad submit handler
+  const handleNumpadSubmit = () => {
+    if (!problemActiveRef.current || !numpadValue) return;
+    const elapsed = Date.now() - startTimeRef.current;
+    const answer = parseInt(numpadValue, 10);
+    if (answer === problem.correctAnswer) {
+      setNumpadFlash('correct');
+      setTimeout(() => setNumpadFlash(null), 500);
+      handleCorrect(elapsed);
+    } else {
+      setNumpadFlash('wrong');
+      setTimeout(() => {
+        setNumpadFlash(null);
+        setNumpadValue('');
+      }, 400);
+      handleWrong();
+    }
+  };
+
+  // Keyboard support
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (modeConfig.inputType === 'numpad') {
+        if (e.key >= '0' && e.key <= '9') {
+          setNumpadValue(prev => prev.length < modeConfig.maxDigits ? prev + e.key : prev);
+        } else if (e.key === 'Backspace') {
+          setNumpadValue(prev => prev.slice(0, -1));
+        } else if (e.key === 'Enter') {
+          handleNumpadSubmit();
+        }
+      } else if (modeConfig.inputType === 'grid') {
+        const num = parseInt(e.key, 10);
+        if (!isNaN(num) && num >= 0 && num <= 9) {
+          handleGridAnswer(num);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [numpadValue, problem, modeConfig]);
+
+  const streakFire = streak >= 10 ? '🔥🔥🔥' : streak >= 7 ? '🔥🔥' : streak >= 5 ? '🔥' : streak >= 3 ? '🔥' : '';
+
+
+  return (
+    <div style={styles.app}>
+      <StarBackground />
+      <div style={{ position: 'relative', zIndex: 1, height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        {/* HUD — compact single bar */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '4px 12px',
+          background: 'rgba(0,0,0,0.3)',
+          borderBottom: '2px solid rgba(255,255,255,0.1)',
+        }}>
+          <button onClick={onBack} style={{
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '16px',
+            padding: '4px 10px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}>🏠</button>
+          <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+            {Array.from({ length: PROBLEMS_PER_WAVE }, (_, i) => (
+              <span key={i} style={{ opacity: i < problemIndex ? 1 : i === problemIndex ? 1 : 0.3, fontSize: '8px' }}>
+                {i <= problemIndex ? '●' : '○'}
+              </span>
+            ))}
+          </div>
+          <span style={{ fontSize: '14px' }}>🏆 {score}</span>
+          <span style={{
+            fontSize: '14px',
+            color: streak >= 5 ? '#f59e0b' : streak >= 3 ? '#fb923c' : '#fff',
+            fontWeight: streak >= 3 ? 800 : 600,
+          }}>
+            {streakFire} {streak > 0 ? streak : ''}
+          </span>
+          <CoinDisplay coins={gameState.coins + coinsEarned} flash={coinFlash} />
+        </div>
+
+        {/* Problem Banner — compact */}
+        <div style={{
+          textAlign: 'center',
+          padding: '6px 10px',
+          background: 'rgba(0,0,0,0.2)',
+        }}>
+          <div style={{
+            fontSize: 'clamp(28px, 6vw, 44px)',
+            fontWeight: 800,
+            textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+            lineHeight: 1.1,
+          }}>
+            {problem.num1} {problem.operator} {problem.num2} = ?
+          </div>
+        </div>
+
+        {/* Main content area — side-by-side for numpad, stacked for grid */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: modeConfig.inputType === 'numpad' ? 'row' : 'column',
+          overflow: 'hidden',
+          position: 'relative',
+        }}>
+          {/* Play Area */}
+          <div ref={playAreaRef} style={{
+            flex: 1,
+            position: 'relative',
+            overflow: 'hidden',
+            minHeight: '200px',
+          }}>
+            <Particles particles={particles} />
+
+            {/* Perfect text */}
+            {perfectText && (
+              <div style={{
+                position: 'absolute',
+                top: '40%',
+                left: modeConfig.inputType === 'numpad' ? '40%' : '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '36px',
+                fontWeight: 800,
+                color: '#f59e0b',
+                textShadow: '0 0 20px rgba(245,158,11,0.8)',
+                animation: 'fadeUp 1s forwards',
+                zIndex: 20,
+                pointerEvents: 'none',
+              }}>
+                ⚡ Perfect!
+              </div>
+            )}
+
+            {/* Show correct answer on timeout */}
+            {showAnswer !== null && (
+              <div style={{
+                position: 'absolute',
+                bottom: '60px',
+                left: modeConfig.inputType === 'numpad' ? '35%' : '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0,0,0,0.7)',
+                padding: '10px 24px',
+                borderRadius: '12px',
+                fontSize: '22px',
+                fontWeight: 700,
+                color: '#fef3c7',
+                zIndex: 20,
+              }}>
+                It was {showAnswer}!
+              </div>
+            )}
+
+            {/* Falling Fruit — offset left in numpad mode so it doesn't overlap */}
+            {!sliceActive && !splatActive && (
+              <div style={{
+                position: 'absolute',
+                top: `${fruitY}%`,
+                left: modeConfig.inputType === 'numpad'
+                  ? `calc(40% + ${fruitX}px)`
+                  : `calc(50% + ${fruitX}px)`,
+                transform: `translate(-50%, -50%) rotate(${fruitRotation}deg)`,
+                fontSize: '56px',
+                transition: 'none',
+                zIndex: 5,
+                filter: `drop-shadow(0 ${4 + fruitY * 0.2}px ${8 + fruitY * 0.3}px rgba(0,0,0,${0.2 + fruitY * 0.003}))`,
+              }}>
+                {fruit.emoji}
+              </div>
+            )}
+
+            {/* Slice Effect */}
+            {sliceActive && (() => {
+              const fruitCenter = modeConfig.inputType === 'numpad'
+                ? `calc(40% + ${fruitX}px)`
+                : `calc(50% + ${fruitX}px)`;
+              return (
+                <>
+                  {/* Slash line */}
+                  <div style={{
+                    position: 'absolute',
+                    top: `${sliceY}%`,
+                    left: '10%',
+                    width: '60%',
+                    height: '4px',
+                    background: isPerfect
+                      ? 'linear-gradient(90deg, transparent, #f59e0b, #fff, #f59e0b, transparent)'
+                      : 'linear-gradient(90deg, transparent, #fff, transparent)',
+                    transform: 'rotate(-15deg)',
+                    animation: 'slashIn 0.2s ease-out',
+                    zIndex: 15,
+                    boxShadow: isPerfect ? '0 0 20px rgba(245,158,11,0.8)' : '0 0 10px rgba(255,255,255,0.5)',
+                  }} />
+                  {/* Split halves */}
+                  <div style={{
+                    position: 'absolute',
+                    top: `${sliceY}%`,
+                    left: `calc(${fruitCenter} - 20px)`,
+                    fontSize: '56px',
+                    animation: isPerfect ? 'splitLeftSpin 0.6s ease-out forwards' : 'splitLeft 0.6s ease-out forwards',
+                    zIndex: 6,
+                    opacity: 0.8,
+                    clipPath: 'inset(0 50% 0 0)',
+                  }}>
+                    {fruit.emoji}
+                  </div>
+                  <div style={{
+                    position: 'absolute',
+                    top: `${sliceY}%`,
+                    left: `calc(${fruitCenter} + 20px)`,
+                    fontSize: '56px',
+                    animation: isPerfect ? 'splitRightSpin 0.6s ease-out forwards' : 'splitRight 0.6s ease-out forwards',
+                    zIndex: 6,
+                    opacity: 0.8,
+                    clipPath: 'inset(0 0 0 50%)',
+                  }}>
+                    {fruit.emoji}
+                  </div>
+                  {/* Screen flash for perfect */}
+                  {isPerfect && (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'rgba(255,255,255,0.15)',
+                      animation: 'flashFade 0.4s ease-out forwards',
+                      zIndex: 14,
+                      pointerEvents: 'none',
+                    }} />
+                  )}
+                </>
+              );
+            })()}
+
+            {/* Splat Effect */}
+            {splatActive && (
+              <div style={{
+                position: 'absolute',
+                bottom: '10px',
+                left: modeConfig.inputType === 'numpad'
+                  ? `calc(40% + ${fruitX}px)`
+                  : `calc(50% + ${fruitX}px)`,
+                transform: 'translateX(-50%) scaleY(0.3) scaleX(1.5)',
+                fontSize: '56px',
+                opacity: 0.7,
+                zIndex: 5,
+              }}>
+                {fruit.emoji}
+              </div>
+            )}
+
+            {/* Ground shadow */}
+            <div style={{
+              position: 'absolute',
+              bottom: '5px',
+              left: modeConfig.inputType === 'numpad'
+                ? `calc(40% + ${fruitX}px)`
+                : `calc(50% + ${fruitX}px)`,
+              transform: 'translateX(-50%)',
+              width: `${20 + fruitY * 0.4}px`,
+              height: '8px',
+              borderRadius: '50%',
+              background: `rgba(0,0,0,${0.1 + fruitY * 0.003})`,
+              transition: 'none',
+            }} />
+          </div>
+
+          {/* Input Area */}
+          {modeConfig.inputType === 'grid' ? (
+            <AnswerGrid
+              onAnswer={handleGridAnswer}
+              disabledNums={disabledNums}
+              flashGreen={gridFlashGreen}
+              flashRed={gridFlashRed}
+            />
+          ) : (
+            /* Numpad — floats on the right side */
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <NumberPad
+                value={numpadValue}
+                onChange={setNumpadValue}
+                onSubmit={handleNumpadSubmit}
+                maxDigits={modeConfig.maxDigits}
+                flashState={numpadFlash}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Wave Complete Screen ---
+function WaveCompleteScreen({ stats, onNextWave, onVisitPuppy, onMenu, gameState }) {
+  const starCount = stats.accuracy >= 90 ? 3 : stats.accuracy >= 70 ? 2 : 1;
+  const [showStars, setShowStars] = useState(0);
+
+  useEffect(() => {
+    const timers = [];
+    for (let i = 1; i <= starCount; i++) {
+      timers.push(setTimeout(() => setShowStars(i), i * 400));
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [starCount]);
+
+  return (
+    <div style={{ ...styles.app, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <StarBackground />
+      <div style={{ ...styles.container, justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+        <h2 style={{
+          fontFamily: "'Fredoka One', sans-serif",
+          fontSize: '36px',
+          margin: '0 0 10px',
+          color: '#f59e0b',
+        }}>
+          Great Job!
+        </h2>
+
+        {/* Stars */}
+        <div style={{ fontSize: '48px', margin: '10px 0 20px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          {[1, 2, 3].map(i => (
+            <span key={i} style={{
+              opacity: i <= showStars ? 1 : 0.2,
+              transform: i <= showStars ? 'scale(1)' : 'scale(0.5)',
+              transition: 'all 0.4s ease-out',
+              filter: i <= showStars ? 'drop-shadow(0 0 8px rgba(245,158,11,0.8))' : 'none',
+            }}>⭐</span>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div style={{
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
+          width: '100%',
+          maxWidth: '350px',
+        }}>
+          <div style={statRow}>
+            <span>🎯 Accuracy</span>
+            <span style={{ color: '#f59e0b', fontWeight: 700 }}>{stats.accuracy}%</span>
+          </div>
+          <div style={statRow}>
+            <span>🔥 Streak</span>
+            <span style={{ fontWeight: 700 }}>{stats.bestStreak}</span>
+          </div>
+          <div style={statRow}>
+            <span>⚡ In a Snap</span>
+            <span style={{ color: '#a855f7', fontWeight: 700 }}>{stats.perfectCount}</span>
+          </div>
+          <div style={{ ...statRow, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px', marginTop: '6px' }}>
+            <span>🪙</span>
+            <span style={{ color: '#f59e0b', fontWeight: 800, fontSize: '20px' }}>+{stats.coinsEarned}</span>
+          </div>
+        </div>
+
+        {/* Pet Status */}
+        <div style={{
+          background: 'rgba(168, 85, 247, 0.15)',
+          borderRadius: '12px',
+          padding: '12px 20px',
+          marginBottom: '20px',
+          fontSize: '14px',
+          width: '100%',
+          maxWidth: '350px',
+        }}>
+          <div style={{ marginBottom: '4px', fontWeight: 700 }}>🐶 Your Puppy</div>
+          <MeterBar label="🍖" value={gameState.pet.hunger} color="#ef4444" />
+          <MeterBar label="💧" value={gameState.pet.thirst} color="#3b82f6" />
+          <MeterBar label="😊" value={gameState.pet.happiness} color="#eab308" />
+        </div>
+
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <button onClick={onNextWave} style={bigBtnStyle('#22c55e', '#16a34a')}>
+            Next! →
+          </button>
+          <button onClick={onVisitPuppy} style={bigBtnStyle('#ec4899', '#a855f7')}>
+            🐶 My Puppy
+          </button>
+          <button onClick={onMenu} style={bigBtnStyle('#6b7280', '#4b5563')}>
+            🏠
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const statRow = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  padding: '6px 0',
+  fontSize: '16px',
+};
+
+function bigBtnStyle(c1, c2) {
+  return {
+    padding: '14px 28px',
+    background: `linear-gradient(135deg, ${c1}, ${c2})`,
+    border: 'none',
+    borderRadius: '16px',
+    color: '#fff',
+    fontSize: '16px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    boxShadow: `0 4px 15px rgba(0,0,0,0.3)`,
+  };
+}
+
+// --- Meter Bar ---
+function MeterBar({ label, value, color }) {
+  const outOf10 = Math.round(value / 10);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0' }}>
+      <span style={{ width: '28px', fontSize: '16px', textAlign: 'center' }}>{label}</span>
+      <div style={{ flex: 1, height: '12px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', overflow: 'hidden' }}>
+        <div style={{
+          width: `${value}%`,
+          height: '100%',
+          background: value < 30 ? '#ef4444' : color,
+          borderRadius: '6px',
+          transition: 'width 0.5s, background 0.5s',
+        }} />
+      </div>
+      <span style={{ width: '38px', fontSize: '14px', textAlign: 'right', fontWeight: 700 }}>{outOf10}/10</span>
+    </div>
+  );
+}
+
+// --- Puppy Component (Paw Patrol-style SVG) ---
+function Puppy({ pet, size = 120, onPet }) {
+  const [wiggle, setWiggle] = useState(false);
+  const [hearts, setHearts] = useState([]);
+  const heartIdRef = useRef(0);
+
+  const handlePet = () => {
+    if (onPet) {
+      onPet();
+      setWiggle(true);
+      setTimeout(() => setWiggle(false), 600);
+      const newHearts = Array.from({ length: 3 }, () => ({
+        id: heartIdRef.current++,
+        x: randInt(-30, 30),
+        delay: Math.random() * 0.3,
+      }));
+      setHearts(prev => [...prev, ...newHearts]);
+      setTimeout(() => {
+        setHearts(prev => prev.filter(h => !newHearts.find(nh => nh.id === h.id)));
+      }, 1500);
+    }
+  };
+
+  const getState = () => {
+    if (pet.hunger < 10 && pet.thirst < 10) return 'neglected';
+    if (pet.hunger < 30) return 'hungry';
+    if (pet.thirst < 30) return 'thirsty';
+    if (pet.happiness < 30) return 'sad';
+    if (pet.hunger > 60 && pet.thirst > 60 && pet.happiness > 60) return 'thriving';
+    return 'content';
+  };
+
+  const state = getState();
+  const acc = pet.purchasedItems || [];
+
+  // Colors
+  const fur = '#c08040';
+  const furDark = '#9a6530';
+  const furLight = '#f5deb3';
+  const earPink = '#f5a0b0';
+  const nose = '#2d1b0e';
+  const tongue = '#ff6b8a';
+  const stroke = '#8b5e3c';
+  const sw = 1.5; // stroke width
+
+  // Mood-driven visuals
+  const eyeRY = { thriving: 8, content: 8, hungry: 9, thirsty: 7, sad: 4, neglected: 2.5 }[state];
+  const showTongue = state === 'thriving' || state === 'thirsty';
+  const showTears = state === 'sad' || state === 'neglected';
+  const earsDown = state === 'sad' || state === 'neglected';
+  const mouthPath = {
+    thriving: 'M40,54 Q50,63 60,54',
+    content: 'M42,54 Q50,59 58,54',
+    hungry: 'M44,55 Q50,55 56,55',
+    thirsty: 'M42,53 Q50,59 58,53',
+    sad: 'M43,57 Q50,53 57,57',
+    neglected: 'M42,58 Q50,53 58,58',
+  }[state];
+
+  return (
+    <div
+      onClick={handlePet}
+      style={{
+        cursor: onPet ? 'pointer' : 'default',
+        position: 'relative',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        animation: wiggle ? 'wiggle 0.6s' : (state === 'thriving' ? 'bounce 2s infinite' : (state === 'neglected' ? 'shiver 0.3s infinite' : '')),
+        transition: 'transform 0.2s',
+      }}
+    >
+      {/* Hearts */}
+      {hearts.map(h => (
+        <div key={h.id} style={{
+          position: 'absolute',
+          top: '-10px',
+          left: `calc(50% + ${h.x}px)`,
+          fontSize: '24px',
+          animation: `floatUp 1.2s ease-out ${h.delay}s forwards`,
+          opacity: 0,
+          pointerEvents: 'none',
+          zIndex: 20,
+        }}>❤️</div>
+      ))}
+
+      <svg
+        width={size}
+        height={size * 1.2}
+        viewBox="0 0 100 120"
+        style={{
+          overflow: 'visible',
+          filter: state === 'neglected' ? 'saturate(0.5) brightness(0.85)' : 'none',
+        }}
+      >
+        {/* ============ BACK LAYER ============ */}
+
+        {/* CAPE (behind everything) */}
+        {acc.includes('cape') && (
+          <g style={{ transformOrigin: '50px 74px', animation: 'capeFlutter 2s ease-in-out infinite' }}>
+            <path d="M30,74 Q50,70 70,74 L78,114 Q50,120 22,114 Z" fill="#dc2626" stroke="#b91c1c" strokeWidth={sw} />
+            <path d="M34,78 Q50,74 66,78 L74,110 Q50,116 26,110 Z" fill="#ef4444" opacity="0.6" />
+            <circle cx="50" cy="74" r="3" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
+          </g>
+        )}
+
+        {/* TAIL */}
+        <g style={{ transformOrigin: '80px 82px', animation: (state === 'thriving' || state === 'content') ? 'tailWag 0.4s ease-in-out infinite alternate' : 'none' }}>
+          <path d="M78,84 Q88,70 82,60" fill="none" stroke={fur} strokeWidth="8" strokeLinecap="round" />
+          <path d="M78,84 Q88,70 82,60" fill="none" stroke={stroke} strokeWidth="9.5" strokeLinecap="round" opacity="0.15" />
+          <circle cx="82" cy="60" r="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+        </g>
+
+        {/* BACK LEGS */}
+        <rect x="32" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
+        <rect x="58" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="37" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="63" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+
+        {/* ============ BODY ============ */}
+        <g style={{ transformOrigin: '50px 90px', animation: 'breathe 3s ease-in-out infinite' }}>
+          {/* Torso */}
+          <ellipse cx="50" cy="90" rx="24" ry="18" fill={fur} stroke={stroke} strokeWidth={sw} />
+          {/* Chest highlight */}
+          <ellipse cx="50" cy="84" rx="14" ry="10" fill={furLight} opacity="0.6" />
+          {/* Belly */}
+          <ellipse cx="50" cy="96" rx="14" ry="9" fill={furLight} />
+        </g>
+
+        {/* NINJA OUTFIT (over body) */}
+        {acc.includes('full_ninja_outfit') && (
+          <g>
+            <ellipse cx="50" cy="90" rx="23" ry="17" fill="#1f2937" opacity="0.7" />
+            <rect x="27" y="88" width="46" height="4" rx="2" fill="#92400e" />
+            <rect x="47" y="86" width="6" height="8" rx="1" fill="#a16207" />
+          </g>
+        )}
+
+        {/* BANDANA (neck) */}
+        {acc.includes('bandana') && (
+          <g>
+            <path d="M28,72 Q50,68 72,72 L70,77 Q50,73 30,77 Z" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
+            <polygon points="46,77 54,77 50,90" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
+          </g>
+        )}
+
+        {/* COLLAR + BELL (neck) */}
+        {acc.includes('collar_bell') && (
+          <g>
+            <path d={`M28,${acc.includes('bandana') ? 77 : 73} Q50,${acc.includes('bandana') ? 73 : 69} 72,${acc.includes('bandana') ? 77 : 73} L72,${acc.includes('bandana') ? 81 : 77} Q50,${acc.includes('bandana') ? 77 : 73} 28,${acc.includes('bandana') ? 81 : 77} Z`} fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" />
+            <g style={{ transformOrigin: `50px ${acc.includes('bandana') ? 81 : 77}px`, animation: 'bellSwing 2s ease-in-out infinite' }}>
+              <circle cx="50" cy={acc.includes('bandana') ? 85 : 81} r="4.5" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
+              <line x1="50" y1={acc.includes('bandana') ? 83 : 79} x2="50" y2={acc.includes('bandana') ? 87 : 83} stroke="#92400e" strokeWidth="0.8" />
+              <circle cx="50" cy={acc.includes('bandana') ? 87 : 83} r="1" fill="#92400e" />
+            </g>
+          </g>
+        )}
+
+        {/* BOW TIE (upper chest) */}
+        {acc.includes('bow_tie') && (
+          <g transform="translate(50, 78)">
+            <polygon points="-10,-5 0,0 -10,5" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
+            <polygon points="10,-5 0,0 10,5" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
+            <circle cx="0" cy="0" r="2.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" />
+          </g>
+        )}
+
+        {/* FRONT LEGS */}
+        <rect x="36" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+        <rect x="54" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="41" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="59" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+
+        {/* SNEAKERS (over front paws) */}
+        {acc.includes('sneakers') && (
+          <g>
+            <rect x="33" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" />
+            <rect x="33" y="112" width="16" height="3.5" rx="2" fill="#60a5fa" />
+            <line x1="36" y1="116" x2="42" y2="116" stroke="#fff" strokeWidth="1" opacity="0.7" />
+            <line x1="36" y1="118" x2="41" y2="118" stroke="#fff" strokeWidth="0.8" opacity="0.5" />
+            <rect x="51" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" />
+            <rect x="51" y="112" width="16" height="3.5" rx="2" fill="#60a5fa" />
+            <line x1="54" y1="116" x2="60" y2="116" stroke="#fff" strokeWidth="1" opacity="0.7" />
+            <line x1="54" y1="118" x2="59" y2="118" stroke="#fff" strokeWidth="0.8" opacity="0.5" />
+          </g>
+        )}
+
+        {/* ============ HEAD ============ */}
+
+        {/* EARS (behind head, in animated groups) */}
+        <g style={{
+          transformOrigin: '26px 28px',
+          animation: earsDown ? 'none' : 'earBounce 3s ease-in-out infinite',
+          transform: earsDown ? 'rotate(25deg) translateY(8px)' : 'rotate(0deg)',
+          transition: 'transform 0.4s ease',
+        }}>
+          <ellipse cx="22" cy="20" rx="13" ry="18" transform="rotate(-15, 22, 20)" fill={fur} stroke={stroke} strokeWidth={sw} />
+          <ellipse cx="22" cy="20" rx="7" ry="12" transform="rotate(-15, 22, 20)" fill={earPink} opacity="0.5" />
+        </g>
+        <g style={{
+          transformOrigin: '74px 28px',
+          animation: earsDown ? 'none' : 'earBounce 3s ease-in-out infinite 0.5s',
+          transform: earsDown ? 'rotate(-25deg) translateY(8px)' : 'rotate(0deg)',
+          transition: 'transform 0.4s ease',
+        }}>
+          <ellipse cx="78" cy="20" rx="13" ry="18" transform="rotate(15, 78, 20)" fill={fur} stroke={stroke} strokeWidth={sw} />
+          <ellipse cx="78" cy="20" rx="7" ry="12" transform="rotate(15, 78, 20)" fill={earPink} opacity="0.5" />
+        </g>
+
+        {/* HEAD CIRCLE */}
+        <circle cx="50" cy="42" r="32" fill={fur} stroke={stroke} strokeWidth={sw} />
+        {/* Head highlight */}
+        <ellipse cx="44" cy="30" rx="16" ry="10" fill={furLight} opacity="0.25" />
+
+        {/* CHEEKS (blush) */}
+        {(state === 'thriving' || state === 'content') && (
+          <>
+            <ellipse cx="24" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" />
+            <ellipse cx="76" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" />
+          </>
+        )}
+
+        {/* MUZZLE */}
+        <ellipse cx="50" cy="52" rx="16" ry="12" fill={furLight} stroke={stroke} strokeWidth={sw * 0.6} />
+
+        {/* EYES */}
+        <g style={{ transformOrigin: '50px 40px', animation: (state === 'content' || state === 'thriving') ? 'happyEyes 4s ease-in-out infinite' : 'none' }}>
+          {/* Left eye */}
+          <ellipse cx="38" cy="40" rx="7" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
+          {state !== 'sad' && state !== 'neglected' && (
+            <>
+              <circle cx="39.5" cy={40 + (eyeRY > 6 ? 1 : 0)} r={Math.min(eyeRY * 0.55, 4.5)} fill={nose} />
+              <circle cx={38} cy={40 - eyeRY * 0.25} r={Math.min(eyeRY * 0.25, 2)} fill="#fff" />
+              {state === 'thriving' && <circle cx="41" cy={41.5} r="0.8" fill="#fff" />}
+            </>
+          )}
+          {(state === 'sad' || state === 'neglected') && (
+            <line x1="32" y1="40" x2="44" y2="40" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+          )}
+
+          {/* Right eye */}
+          <ellipse cx="62" cy="40" rx="7" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
+          {state !== 'sad' && state !== 'neglected' && (
+            <>
+              <circle cx="60.5" cy={40 + (eyeRY > 6 ? 1 : 0)} r={Math.min(eyeRY * 0.55, 4.5)} fill={nose} />
+              <circle cx={62} cy={40 - eyeRY * 0.25} r={Math.min(eyeRY * 0.25, 2)} fill="#fff" />
+              {state === 'thriving' && <circle cx="59" cy={41.5} r="0.8" fill="#fff" />}
+            </>
+          )}
+          {(state === 'sad' || state === 'neglected') && (
+            <line x1="56" y1="40" x2="68" y2="40" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+          )}
+        </g>
+
+        {/* EYEBROWS (sad/neglected) */}
+        {state === 'sad' && (
+          <>
+            <line x1="30" y1="33" x2="42" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+            <line x1="70" y1="33" x2="58" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+          </>
+        )}
+        {state === 'neglected' && (
+          <>
+            <line x1="29" y1="32" x2="43" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="71" y1="32" x2="57" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" />
+          </>
+        )}
+
+        {/* NOSE */}
+        <ellipse cx="50" cy="49" rx="5" ry="3.5" fill={nose} />
+        <ellipse cx="48.5" cy="48" rx="2" ry="1.2" fill="rgba(255,255,255,0.3)" />
+
+        {/* MOUTH */}
+        <path d={mouthPath} fill="none" stroke={nose} strokeWidth="1.8" strokeLinecap="round" />
+
+        {/* TONGUE */}
+        {showTongue && (
+          <g style={{ transformOrigin: '50px 58px', animation: 'tongueWag 1s ease-in-out infinite' }}>
+            <ellipse cx="50" cy="60" rx="4" ry="5" fill={tongue} stroke="#e55a7a" strokeWidth="0.8" />
+            <line x1="50" y1="56" x2="50" y2="63" stroke="#e55a7a" strokeWidth="0.6" />
+          </g>
+        )}
+
+        {/* TEARS */}
+        {showTears && (
+          <>
+            <ellipse cx="30" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation: 'tearDrip 2s ease-in-out infinite' }} />
+            {state === 'neglected' && (
+              <ellipse cx="70" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation: 'tearDrip 2s ease-in-out infinite 0.8s' }} />
+            )}
+          </>
+        )}
+
+        {/* ============ HEAD ACCESSORIES ============ */}
+
+        {/* SUNGLASSES */}
+        {acc.includes('sunglasses') && (
+          <g>
+            <rect x="28" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+            <rect x="56" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+            <line x1="44" y1="40" x2="56" y2="40" stroke="#475569" strokeWidth="1.5" />
+            <line x1="28" y1="38" x2="20" y2="36" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="72" y1="38" x2="80" y2="36" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
+            <rect x="30" y="37" width="4" height="3" rx="1" fill="rgba(255,255,255,0.12)" />
+            <rect x="58" y="37" width="4" height="3" rx="1" fill="rgba(255,255,255,0.12)" />
+          </g>
+        )}
+
+        {/* NINJA MASK */}
+        {acc.includes('ninja_mask') && (
+          <rect x="30" y="47" width="40" height="14" rx="5" fill="#1f2937" opacity="0.85" />
+        )}
+
+        {/* NINJA HEADBAND */}
+        {acc.includes('ninja_headband') && (
+          <g>
+            <rect x="18" y="28" width="64" height="7" rx="3.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" />
+            <path d="M82,29 Q92,27 97,32" stroke="#dc2626" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+            <path d="M82,33 Q90,34 95,40" stroke="#b91c1c" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+          </g>
+        )}
+
+        {/* CROWN */}
+        {acc.includes('crown') && (
+          <g transform="translate(50, 10)">
+            <polygon points="-16,12 -12,0 -6,8 0,-6 6,8 12,0 16,12" fill="#fbbf24" stroke="#d97706" strokeWidth="1.2" />
+            <rect x="-16" y="10" width="32" height="5" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+            <circle cx="-10" cy="2" r="2" fill="#ef4444" />
+            <circle cx="0" cy="-4" r="2" fill="#3b82f6" />
+            <circle cx="10" cy="2" r="2" fill="#22c55e" />
+          </g>
+        )}
+
+        {/* TINY SWORD (held to the right) */}
+        {acc.includes('tiny_sword') && (
+          <g transform="translate(84, 55) rotate(-35)">
+            <rect x="-2" y="-24" width="4" height="22" rx="1.5" fill="#d1d5db" stroke="#9ca3af" strokeWidth="0.8" />
+            <polygon points="-2,-24 2,-24 0,-30" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.8" />
+            <rect x="-1" y="-25" width="2" height="18" rx="0.5" fill="#f3f4f6" opacity="0.4" />
+            <rect x="-6" y="-2" width="12" height="3.5" rx="1.5" fill="#d97706" stroke="#92400e" strokeWidth="0.8" />
+            <rect x="-1.5" y="1.5" width="3" height="10" rx="1.5" fill="#78350f" />
+            <line x1="-0.5" y1="3" x2="-0.5" y2="9" stroke="#5c2d05" strokeWidth="0.6" />
+            <line x1="0.5" y1="4" x2="0.5" y2="8" stroke="#5c2d05" strokeWidth="0.4" />
+          </g>
+        )}
+      </svg>
+
+      {/* Status text */}
+      <div style={{ fontSize: '14px', marginTop: '4px', opacity: 0.7, fontWeight: 600 }}>
+        {state === 'thriving' && '✨ Happy!'}
+        {state === 'content' && '😊'}
+        {state === 'hungry' && '🍖 Hungry...'}
+        {state === 'thirsty' && '💧 Thirsty...'}
+        {state === 'sad' && '😢 Sad...'}
+        {state === 'neglected' && '😿 Feed me!'}
+      </div>
+    </div>
+  );
+}
+
+// --- Puppy Home Screen ---
+function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
+  const [showShop, setShowShop] = useState(false);
+  const [petCount, setPetCount] = useState(0);
+  const [buyAnimation, setBuyAnimation] = useState(null);
+
+  const handlePetPuppy = () => {
+    const boosts = [5, 3, 1, 0];
+    const boost = boosts[Math.min(petCount, boosts.length - 1)];
+    if (boost > 0) {
+      const newState = {
+        ...gameState,
+        pet: {
+          ...gameState.pet,
+          happiness: Math.min(100, gameState.pet.happiness + boost),
+        },
+      };
+      setGameState(newState);
+      saveState(newState);
+    }
+    setPetCount(prev => prev + 1);
+  };
+
+  const handleBuy = (itemId) => {
+    const item = SHOP_ITEMS[itemId];
+    if (!item || gameState.coins < item.cost) return;
+
+    let newState = { ...gameState, coins: gameState.coins - item.cost };
+    let petUpdate = { ...newState.pet };
+
+    if (item.oneTime) {
+      petUpdate.purchasedItems = [...petUpdate.purchasedItems, itemId];
+      if (item.happinessBoost) {
+        petUpdate.happiness = Math.min(100, petUpdate.happiness + item.happinessBoost);
+      }
+      if (item.roomTheme) {
+        petUpdate.roomTheme = item.roomTheme;
+      }
+    } else {
+      // Consumable
+      if (item.stat === 'hunger') {
+        petUpdate.hunger = Math.min(100, petUpdate.hunger + item.amount);
+      } else if (item.stat === 'thirst') {
+        petUpdate.thirst = Math.min(100, petUpdate.thirst + item.amount);
+      } else if (item.stat === 'treat') {
+        petUpdate.hunger = Math.min(100, petUpdate.hunger + item.hungerAmt);
+        petUpdate.happiness = Math.min(100, petUpdate.happiness + item.happyAmt);
+      }
+    }
+
+    newState.pet = petUpdate;
+    setGameState(newState);
+    saveState(newState);
+
+    setBuyAnimation(itemId);
+    setTimeout(() => setBuyAnimation(null), 600);
+  };
+
+  const roomBg = gameState.pet.roomTheme === 'dojo'
+    ? 'linear-gradient(180deg, #1a0a00 0%, #2d1810 50%, #4a2c17 100%)'
+    : gameState.pet.roomTheme === 'painted'
+      ? 'linear-gradient(180deg, #1e3a5f 0%, #2d5a3e 50%, #4a7c59 100%)'
+      : 'linear-gradient(180deg, #2a1a0a 0%, #3d2817 50%, #5a3d2a 100%)';
+
+  if (showShop) {
+    return (
+      <ShopScreen
+        gameState={gameState}
+        onBuy={handleBuy}
+        onBack={() => setShowShop(false)}
+        buyAnimation={buyAnimation}
+      />
+    );
+  }
+
+  return (
+    <div style={styles.app}>
+      <StarBackground />
+      <div style={{ ...styles.container, alignItems: 'center' }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          padding: '12px 0',
+        }}>
+          <button onClick={onBack} style={{
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '16px',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}>🏠</button>
+          <CoinDisplay coins={gameState.coins} />
+        </div>
+
+        {/* Meters */}
+        <div style={{ width: '100%', maxWidth: '400px', margin: '10px 0' }}>
+          <MeterBar label="🍖" value={gameState.pet.hunger} color="#ef4444" />
+          <MeterBar label="💧" value={gameState.pet.thirst} color="#3b82f6" />
+          <MeterBar label="😊" value={gameState.pet.happiness} color="#eab308" />
+        </div>
+
+        {/* Puppy Room */}
+        <div style={{
+          width: '100%',
+          maxWidth: '400px',
+          background: roomBg,
+          borderRadius: '20px',
+          border: '3px solid rgba(139, 92, 42, 0.5)',
+          padding: '30px 20px',
+          margin: '10px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          minHeight: '280px',
+          justifyContent: 'center',
+          position: 'relative',
+        }}>
+          {/* Room decorations */}
+          {gameState.pet.roomTheme === 'dojo' && (
+            <div style={{ position: 'absolute', top: '10px', right: '15px', fontSize: '32px', opacity: 0.5 }}>⛩️</div>
+          )}
+
+          <Puppy pet={gameState.pet} size={110} onPet={handlePetPuppy} />
+
+          {/* Items in room */}
+          <div style={{ display: 'flex', gap: '16px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {gameState.pet.purchasedItems.includes('food_bowl') && <span style={{ fontSize: '28px' }}>🥣</span>}
+            {gameState.pet.purchasedItems.includes('water_bowl') && <span style={{ fontSize: '28px' }}>🥤</span>}
+            {gameState.pet.purchasedItems.includes('bed') && <span style={{ fontSize: '28px' }}>🛏️</span>}
+            {gameState.pet.purchasedItems.includes('toy_ball') && <span style={{ fontSize: '28px' }}>⚾</span>}
+            {gameState.pet.purchasedItems.includes('chew_rope') && <span style={{ fontSize: '28px' }}>🪢</span>}
+          </div>
+
+          <div style={{ fontSize: '13px', opacity: 0.5, marginTop: '12px' }}>
+            Tap me! 👆
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+          <button onClick={() => setShowShop(true)} style={bigBtnStyle('#f59e0b', '#d97706')}>
+            🛒 Shop
+          </button>
+          <button onClick={onPlay} style={bigBtnStyle('#22c55e', '#16a34a')}>
+            🎮 Play!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Shop Screen ---
+function ShopScreen({ gameState, onBuy, onBack, buyAnimation }) {
+  const [tab, setTab] = useState('consumables');
+  const purchased = gameState.pet.purchasedItems;
+
+  const tabs = [
+    { id: 'consumables', label: '🍖 Food' },
+    { id: 'necessities', label: '🏠 Stuff' },
+    { id: 'accessories', label: '✨ Cool Stuff' },
+  ];
+
+  const getItems = () => {
+    return Object.entries(SHOP_ITEMS).filter(([_, item]) => {
+      if (tab === 'consumables') return item.category === 'consumables';
+      if (tab === 'necessities') return item.category === 'necessities' || item.category === 'upgrades';
+      if (tab === 'accessories') return item.category === 'accessories';
+      return false;
+    });
+  };
+
+  const canBuy = (itemId, item) => {
+    if (gameState.coins < item.cost) return false;
+    if (item.oneTime && purchased.includes(itemId)) return false;
+    if (item.requires && !purchased.includes(item.requires)) return false;
+    return true;
+  };
+
+  const getStatus = (itemId, item) => {
+    if (item.oneTime && purchased.includes(itemId)) return 'purchased';
+    if (item.requires && !purchased.includes(item.requires)) return 'locked';
+    if (gameState.coins < item.cost) return 'cantAfford';
+    return 'available';
+  };
+
+  return (
+    <div style={styles.app}>
+      <StarBackground />
+      <div style={{ ...styles.container, alignItems: 'center' }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          padding: '12px 0',
+        }}>
+          <button onClick={onBack} style={{
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            color: '#fff',
+            fontSize: '16px',
+            padding: '8px 16px',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}>←</button>
+          <h2 style={{ fontFamily: "'Fredoka One', sans-serif", fontSize: '24px', margin: 0, color: '#f59e0b' }}>🛒 Shop</h2>
+          <CoinDisplay coins={gameState.coins} />
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '6px', margin: '10px 0', width: '100%', maxWidth: '500px' }}>
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              style={{
+                flex: 1,
+                padding: '10px 8px',
+                background: tab === t.id ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.05)',
+                border: tab === t.id ? '2px solid #f59e0b' : '2px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}
+            >{t.label}</button>
+          ))}
+        </div>
+
+        {/* Items */}
+        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '20px' }}>
+          {getItems().map(([itemId, item]) => {
+            const status = getStatus(itemId, item);
+            const isBuying = buyAnimation === itemId;
+            return (
+              <div key={itemId} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: isBuying ? 'rgba(34,197,94,0.3)' : status === 'purchased' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.06)',
+                borderRadius: '14px',
+                padding: '12px 16px',
+                border: status === 'purchased' ? '2px solid rgba(34,197,94,0.3)' : '2px solid rgba(255,255,255,0.08)',
+                opacity: status === 'cantAfford' || status === 'locked' ? 0.5 : 1,
+                transition: 'all 0.3s',
+              }}>
+                <span style={{ fontSize: '32px' }}>{status === 'locked' ? '🔒' : item.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: '15px' }}>{item.name}</div>
+                  <div style={{ fontSize: '12px', opacity: 0.7 }}>
+                    {status === 'locked' ? `Need ${SHOP_ITEMS[item.requires]?.icon} ${SHOP_ITEMS[item.requires]?.name} first!` : item.effect}
+                  </div>
+                </div>
+                {status === 'purchased' ? (
+                  <span style={{ color: '#22c55e', fontWeight: 700, fontSize: '20px' }}>✅</span>
+                ) : (
+                  <button
+                    onClick={() => canBuy(itemId, item) && onBuy(itemId)}
+                    disabled={!canBuy(itemId, item)}
+                    style={{
+                      padding: '8px 16px',
+                      background: canBuy(itemId, item) ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'rgba(100,100,100,0.3)',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '14px',
+                      cursor: canBuy(itemId, item) ? 'pointer' : 'default',
+                      fontFamily: 'inherit',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    🪙 {item.cost}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// CSS ANIMATIONS
+// ============================================================================
+
+const globalCSS = `
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { margin: 0; overflow-x: hidden; background: #1a1a2e; }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  @keyframes slashIn {
+    0% { opacity: 0; transform: rotate(-15deg) scaleX(0); }
+    100% { opacity: 1; transform: rotate(-15deg) scaleX(1); }
+  }
+
+  @keyframes splitLeft {
+    0% { transform: translate(0, 0); opacity: 0.8; }
+    100% { transform: translate(-60px, 40px); opacity: 0; }
+  }
+
+  @keyframes splitRight {
+    0% { transform: translate(0, 0); opacity: 0.8; }
+    100% { transform: translate(60px, 40px); opacity: 0; }
+  }
+
+  @keyframes splitLeftSpin {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+    100% { transform: translate(-80px, 50px) rotate(-180deg); opacity: 0; }
+  }
+
+  @keyframes splitRightSpin {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+    100% { transform: translate(80px, 50px) rotate(180deg); opacity: 0; }
+  }
+
+  @keyframes flashFade {
+    0% { opacity: 0.15; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes fadeUp {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+    50% { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -100%) scale(1); }
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-10deg); }
+    40% { transform: rotate(10deg); }
+    60% { transform: rotate(-8deg); }
+    80% { transform: rotate(8deg); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes tailWag {
+    0% { transform: rotate(-15deg); }
+    100% { transform: rotate(15deg); }
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0) scale(0.5); }
+    20% { opacity: 1; transform: translateY(-10px) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+  }
+
+  @keyframes earBounce {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    30% { transform: rotate(-4deg) translateY(-2px); }
+    60% { transform: rotate(3deg) translateY(-1px); }
+  }
+
+  @keyframes happyEyes {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+
+  @keyframes tongueWag {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.03); }
+  }
+
+  @keyframes shiver {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+  }
+
+  @keyframes tearDrip {
+    0% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(8px); }
+  }
+
+  @keyframes bellSwing {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+  }
+
+  @keyframes capeFlutter {
+    0%, 100% { transform: skewX(0deg); }
+    50% { transform: skewX(3deg); }
+  }
+
+  button:active {
+    transform: scale(0.95) !important;
+  }
+`;
+
+// ============================================================================
+// MAIN APP
+// ============================================================================
+
+export default function App() {
+  const [gameState, setGameState] = useState(loadState);
+  const [screen, setScreen] = useState('title');
+  const [currentMode, setCurrentMode] = useState(null);
+  const [currentWave, setCurrentWave] = useState(1);
+  const [waveStats, setWaveStats] = useState(null);
+  const [gameKey, setGameKey] = useState(0);
+
+  // Inject global CSS
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = globalCSS;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
+  const handleSelectMode = (modeId) => {
+    setCurrentMode(modeId);
+    setCurrentWave(gameState.progress[modeId].currentWave);
+    setGameKey(prev => prev + 1);
+    setScreen('gameplay');
+  };
+
+  const handleWaveComplete = (stats) => {
+    setWaveStats(stats);
+    setScreen('waveComplete');
+  };
+
+  const handleNextWave = () => {
+    setCurrentWave(prev => prev + 1);
+    setGameKey(prev => prev + 1);
+    setScreen('gameplay');
+  };
+
+  const handleVisitPuppy = () => {
+    setScreen('puppy');
+  };
+
+  const handleMenu = () => {
+    setScreen('title');
+  };
+
+  if (screen === 'title') {
+    return (
+      <div style={styles.app}>
+        <StarBackground />
+        <TitleScreen
+          gameState={gameState}
+          onSelectMode={handleSelectMode}
+          onVisitPuppy={handleVisitPuppy}
+        />
+      </div>
+    );
+  }
+
+  if (screen === 'gameplay') {
+    return (
+      <GameplayScreen
+        key={gameKey}
+        mode={currentMode}
+        wave={currentWave}
+        gameState={gameState}
+        setGameState={setGameState}
+        onWaveComplete={handleWaveComplete}
+        onBack={handleMenu}
+      />
+    );
+  }
+
+  if (screen === 'waveComplete') {
+    return (
+      <WaveCompleteScreen
+        stats={waveStats}
+        gameState={gameState}
+        onNextWave={handleNextWave}
+        onVisitPuppy={handleVisitPuppy}
+        onMenu={handleMenu}
+      />
+    );
+  }
+
+  if (screen === 'puppy') {
+    return (
+      <PuppyHomeScreen
+        gameState={gameState}
+        setGameState={setGameState}
+        onBack={handleMenu}
+        onPlay={() => setScreen('title')}
+      />
+    );
+  }
+
+  return null;
+}
