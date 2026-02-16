@@ -70,20 +70,9 @@ const SHOP_ITEMS = {
   spring_water: { name: 'Spring Water', cost: 25, category: 'consumables', effect: '🫗 → 🐶😍', icon: '🫗', oneTime: false, requires: 'premium_water_bowl', stat: 'thirst', amount: 50 },
   treat: { name: 'Treat', cost: 10, category: 'consumables', effect: '🦴 → 🐶💕', icon: '🦴', oneTime: false, requires: 'treat_bag', stat: 'treat', hungerAmt: 15, happyAmt: 5 },
 
-  // Accessories
-  bandana: { name: 'Bandana', cost: 80, category: 'accessories', effect: 'So cute! 😊', icon: '🎀', oneTime: true, happinessBoost: 5 },
-  collar_bell: { name: 'Bell Collar', cost: 100, category: 'accessories', effect: 'Jingle jingle! 🔔', icon: '🔔', oneTime: true, happinessBoost: 5 },
-  bow_tie: { name: 'Bow Tie', cost: 120, category: 'accessories', effect: 'Fancy puppy! 🎩', icon: '🎩', oneTime: true, happinessBoost: 6 },
-  ninja_headband: { name: 'Ninja Headband', cost: 150, category: 'accessories', effect: 'Ninja puppy! 🥋', icon: '🥋', oneTime: true, happinessBoost: 8 },
-  sneakers: { name: 'Sneakers', cost: 180, category: 'accessories', effect: 'Fast puppy! 👟', icon: '👟', oneTime: true, happinessBoost: 8 },
-  sunglasses: { name: 'Sunglasses', cost: 200, category: 'accessories', effect: 'Cool puppy! 😎', icon: '😎', oneTime: true, happinessBoost: 10 },
-  cape: { name: 'Cape', cost: 250, category: 'accessories', effect: 'Super puppy! 🦸', icon: '🦸', oneTime: true, happinessBoost: 10 },
-  tiny_sword: { name: 'Ninja Sword', cost: 300, category: 'accessories', effect: 'Warrior puppy! ⚔️', icon: '⚔️', oneTime: true, happinessBoost: 12 },
-  ninja_mask: { name: 'Ninja Mask', cost: 350, category: 'accessories', effect: 'Sneaky puppy! 🎭', icon: '🎭', oneTime: true, happinessBoost: 12 },
-  crown: { name: 'Crown', cost: 400, category: 'accessories', effect: 'Royal puppy! 👑', icon: '👑', oneTime: true, happinessBoost: 15 },
-  painted_house: { name: 'Pretty House', cost: 400, category: 'accessories', effect: 'New room! 🏠', icon: '🏠', oneTime: true, happinessBoost: 15, roomTheme: 'painted' },
-  full_ninja_outfit: { name: 'Ninja Outfit', cost: 500, category: 'accessories', effect: 'Full ninja! 🥷', icon: '🥷', oneTime: true, happinessBoost: 20 },
-  ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'accessories', effect: 'Ninja home! ⛩️', icon: '⛩️', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
+  // Room Themes
+  painted_house: { name: 'Pretty House', cost: 400, category: 'upgrades', effect: 'New room! 🏠', icon: '🏠', oneTime: true, happinessBoost: 15, roomTheme: 'painted' },
+  ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'upgrades', effect: 'Ninja home! ⛩️', icon: '⛩️', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
 };
 
 // ============================================================================
@@ -1350,368 +1339,8 @@ function MeterBar({ label, value, color }) {
   );
 }
 
-// --- Puppy Component (Paw Patrol-style SVG) ---
-function Puppy({ pet, size = 120, onPet }) {
-  const [wiggle, setWiggle] = useState(false);
-  const [hearts, setHearts] = useState([]);
-  const heartIdRef = useRef(0);
-
-  const handlePet = () => {
-    if (onPet) {
-      onPet();
-      setWiggle(true);
-      setTimeout(() => setWiggle(false), 600);
-      const newHearts = Array.from({ length: 3 }, () => ({
-        id: heartIdRef.current++,
-        x: randInt(-30, 30),
-        delay: Math.random() * 0.3,
-      }));
-      setHearts(prev => [...prev, ...newHearts]);
-      setTimeout(() => {
-        setHearts(prev => prev.filter(h => !newHearts.find(nh => nh.id === h.id)));
-      }, 1500);
-    }
-  };
-
-  const getState = () => {
-    if (pet.hunger < 10 && pet.thirst < 10) return 'neglected';
-    if (pet.hunger < 30) return 'hungry';
-    if (pet.thirst < 30) return 'thirsty';
-    if (pet.happiness < 30) return 'sad';
-    if (pet.hunger > 60 && pet.thirst > 60 && pet.happiness > 60) return 'thriving';
-    return 'content';
-  };
-
-  const state = getState();
-  const acc = pet.purchasedItems || [];
-
-  // Colors
-  const fur = '#c08040';
-  const furDark = '#9a6530';
-  const furLight = '#f5deb3';
-  const earPink = '#f5a0b0';
-  const nose = '#2d1b0e';
-  const tongue = '#ff6b8a';
-  const stroke = '#8b5e3c';
-  const sw = 1.5; // stroke width
-
-  // Mood-driven visuals
-  const eyeRY = { thriving: 10, content: 10, hungry: 11, thirsty: 9, sad: 5, neglected: 3 }[state];
-  const showTongue = state === 'thriving' || state === 'thirsty';
-  const showTears = state === 'sad' || state === 'neglected';
-  const earsDown = state === 'sad' || state === 'neglected';
-  const mouthPath = {
-    thriving: 'M40,54 Q50,63 60,54',
-    content: 'M42,54 Q50,59 58,54',
-    hungry: 'M44,55 Q50,55 56,55',
-    thirsty: 'M42,53 Q50,59 58,53',
-    sad: 'M43,57 Q50,53 57,57',
-    neglected: 'M42,58 Q50,53 58,58',
-  }[state];
-
-  return (
-    <div
-      onClick={handlePet}
-      style={{
-        cursor: onPet ? 'pointer' : 'default',
-        position: 'relative',
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        animation: wiggle ? 'wiggle 0.6s' : (state === 'thriving' ? 'bounce 2s infinite' : (state === 'neglected' ? 'shiver 0.3s infinite' : '')),
-        transition: 'transform 0.2s',
-      }}
-    >
-      {/* Hearts */}
-      {hearts.map(h => (
-        <div key={h.id} style={{
-          position: 'absolute',
-          top: '-10px',
-          left: `calc(50% + ${h.x}px)`,
-          fontSize: '24px',
-          animation: `floatUp 1.2s ease-out ${h.delay}s forwards`,
-          opacity: 0,
-          pointerEvents: 'none',
-          zIndex: 20,
-        }}>❤️</div>
-      ))}
-
-      <svg
-        width={size}
-        height={size * 1.2}
-        viewBox="0 0 100 120"
-        style={{
-          overflow: 'visible',
-          filter: state === 'neglected' ? 'saturate(0.5) brightness(0.85)' : 'none',
-        }}
-      >
-        {/* ============ BACK LAYER ============ */}
-
-        {/* CAPE (behind everything) */}
-        {acc.includes('cape') && (
-          <g style={{ transformOrigin: '50px 74px', animation: 'capeFlutter 2s ease-in-out infinite' }}>
-            <path d="M30,74 Q50,70 70,74 L78,114 Q50,120 22,114 Z" fill="#dc2626" stroke="#b91c1c" strokeWidth={sw} />
-            <path d="M34,78 Q50,74 66,78 L74,110 Q50,116 26,110 Z" fill="#ef4444" opacity="0.6" />
-            <circle cx="50" cy="74" r="3" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
-          </g>
-        )}
-
-        {/* TAIL */}
-        <g style={{ transformOrigin: '80px 82px', animation: (state === 'thriving' || state === 'content') ? 'tailWag 0.4s ease-in-out infinite alternate' : 'none' }}>
-          <path d="M78,84 Q88,70 82,60" fill="none" stroke={fur} strokeWidth="8" strokeLinecap="round" />
-          <path d="M78,84 Q88,70 82,60" fill="none" stroke={stroke} strokeWidth="9.5" strokeLinecap="round" opacity="0.15" />
-          <circle cx="82" cy="60" r="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-        </g>
-
-        {/* BACK LEGS */}
-        <rect x="32" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
-        <rect x="58" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="37" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="63" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-
-        {/* ============ BODY ============ */}
-        <g style={{ transformOrigin: '50px 90px', animation: 'breathe 3s ease-in-out infinite' }}>
-          {/* Torso */}
-          <ellipse cx="50" cy="90" rx="24" ry="18" fill={fur} stroke={stroke} strokeWidth={sw} />
-          {/* Chest highlight */}
-          <ellipse cx="50" cy="84" rx="14" ry="10" fill={furLight} opacity="0.6" />
-          {/* Belly */}
-          <ellipse cx="50" cy="96" rx="14" ry="9" fill={furLight} />
-        </g>
-
-        {/* NINJA OUTFIT (over body) */}
-        {acc.includes('full_ninja_outfit') && (
-          <g>
-            <ellipse cx="50" cy="90" rx="23" ry="17" fill="#1f2937" opacity="0.7" />
-            <rect x="27" y="88" width="46" height="4" rx="2" fill="#92400e" />
-            <rect x="47" y="86" width="6" height="8" rx="1" fill="#a16207" />
-          </g>
-        )}
-
-        {/* BANDANA (neck) */}
-        {acc.includes('bandana') && (
-          <g>
-            <path d="M28,72 Q50,68 72,72 L70,77 Q50,73 30,77 Z" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
-            <polygon points="46,77 54,77 50,90" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
-          </g>
-        )}
-
-        {/* COLLAR + BELL (neck) */}
-        {acc.includes('collar_bell') && (
-          <g>
-            <path d={`M28,${acc.includes('bandana') ? 77 : 73} Q50,${acc.includes('bandana') ? 73 : 69} 72,${acc.includes('bandana') ? 77 : 73} L72,${acc.includes('bandana') ? 81 : 77} Q50,${acc.includes('bandana') ? 77 : 73} 28,${acc.includes('bandana') ? 81 : 77} Z`} fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" />
-            <g style={{ transformOrigin: `50px ${acc.includes('bandana') ? 81 : 77}px`, animation: 'bellSwing 2s ease-in-out infinite' }}>
-              <circle cx="50" cy={acc.includes('bandana') ? 85 : 81} r="4.5" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
-              <line x1="50" y1={acc.includes('bandana') ? 83 : 79} x2="50" y2={acc.includes('bandana') ? 87 : 83} stroke="#92400e" strokeWidth="0.8" />
-              <circle cx="50" cy={acc.includes('bandana') ? 87 : 83} r="1" fill="#92400e" />
-            </g>
-          </g>
-        )}
-
-        {/* BOW TIE (upper chest) */}
-        {acc.includes('bow_tie') && (
-          <g transform="translate(50, 78)">
-            <polygon points="-10,-5 0,0 -10,5" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
-            <polygon points="10,-5 0,0 10,5" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
-            <circle cx="0" cy="0" r="2.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" />
-          </g>
-        )}
-
-        {/* FRONT LEGS */}
-        <rect x="36" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-        <rect x="54" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="41" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="59" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-
-        {/* SNEAKERS (over front paws) */}
-        {acc.includes('sneakers') && (
-          <g>
-            <rect x="33" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" />
-            <rect x="33" y="112" width="16" height="3.5" rx="2" fill="#60a5fa" />
-            <line x1="36" y1="116" x2="42" y2="116" stroke="#fff" strokeWidth="1" opacity="0.7" />
-            <line x1="36" y1="118" x2="41" y2="118" stroke="#fff" strokeWidth="0.8" opacity="0.5" />
-            <rect x="51" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" />
-            <rect x="51" y="112" width="16" height="3.5" rx="2" fill="#60a5fa" />
-            <line x1="54" y1="116" x2="60" y2="116" stroke="#fff" strokeWidth="1" opacity="0.7" />
-            <line x1="54" y1="118" x2="59" y2="118" stroke="#fff" strokeWidth="0.8" opacity="0.5" />
-          </g>
-        )}
-
-        {/* ============ HEAD ============ */}
-
-        {/* EARS (behind head, in animated groups) */}
-        <g style={{
-          transformOrigin: '26px 28px',
-          animation: earsDown ? 'none' : 'earBounce 3s ease-in-out infinite',
-          transform: earsDown ? 'rotate(25deg) translateY(8px)' : 'rotate(0deg)',
-          transition: 'transform 0.4s ease',
-        }}>
-          <ellipse cx="22" cy="20" rx="13" ry="18" transform="rotate(-15, 22, 20)" fill={fur} stroke={stroke} strokeWidth={sw} />
-          <ellipse cx="22" cy="20" rx="7" ry="12" transform="rotate(-15, 22, 20)" fill={earPink} opacity="0.5" />
-        </g>
-        <g style={{
-          transformOrigin: '74px 28px',
-          animation: earsDown ? 'none' : 'earBounce 3s ease-in-out infinite 0.5s',
-          transform: earsDown ? 'rotate(-25deg) translateY(8px)' : 'rotate(0deg)',
-          transition: 'transform 0.4s ease',
-        }}>
-          <ellipse cx="78" cy="20" rx="13" ry="18" transform="rotate(15, 78, 20)" fill={fur} stroke={stroke} strokeWidth={sw} />
-          <ellipse cx="78" cy="20" rx="7" ry="12" transform="rotate(15, 78, 20)" fill={earPink} opacity="0.5" />
-        </g>
-
-        {/* HEAD CIRCLE */}
-        <circle cx="50" cy="42" r="32" fill={fur} stroke={stroke} strokeWidth={sw} />
-        {/* Head highlight */}
-        <ellipse cx="44" cy="30" rx="16" ry="10" fill={furLight} opacity="0.25" />
-
-        {/* CHEEKS (blush) */}
-        {(state === 'thriving' || state === 'content') && (
-          <>
-            <ellipse cx="24" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" />
-            <ellipse cx="76" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" />
-          </>
-        )}
-
-        {/* MUZZLE */}
-        <ellipse cx="50" cy="52" rx="16" ry="12" fill={furLight} stroke={stroke} strokeWidth={sw * 0.6} />
-
-        {/* EYES — big & glossy Paw Patrol style */}
-        <g style={{ transformOrigin: '50px 39px', animation: (state === 'content' || state === 'thriving') ? 'happyEyes 4s ease-in-out infinite' : 'none' }}>
-          {/* Left eye */}
-          <ellipse cx="38" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
-          {state !== 'sad' && state !== 'neglected' && (
-            <>
-              <circle cx="39.5" cy={39 + (eyeRY > 7 ? 1.5 : 0)} r={Math.min(eyeRY * 0.5, 5.5)} fill={nose} />
-              <circle cx="36.5" cy={39 - eyeRY * 0.28} r={Math.min(eyeRY * 0.25, 2.5)} fill="#fff" />
-              <circle cx="41" cy={39 + eyeRY * 0.15} r="1" fill="#fff" />
-            </>
-          )}
-          {(state === 'sad' || state === 'neglected') && (
-            <line x1="30" y1="39" x2="46" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />
-          )}
-
-          {/* Right eye */}
-          <ellipse cx="62" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
-          {state !== 'sad' && state !== 'neglected' && (
-            <>
-              <circle cx="60.5" cy={39 + (eyeRY > 7 ? 1.5 : 0)} r={Math.min(eyeRY * 0.5, 5.5)} fill={nose} />
-              <circle cx="63.5" cy={39 - eyeRY * 0.28} r={Math.min(eyeRY * 0.25, 2.5)} fill="#fff" />
-              <circle cx="59" cy={39 + eyeRY * 0.15} r="1" fill="#fff" />
-            </>
-          )}
-          {(state === 'sad' || state === 'neglected') && (
-            <line x1="54" y1="39" x2="70" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />
-          )}
-        </g>
-
-        {/* EYEBROWS (sad/neglected) */}
-        {state === 'sad' && (
-          <>
-            <line x1="30" y1="33" x2="42" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" />
-            <line x1="70" y1="33" x2="58" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" />
-          </>
-        )}
-        {state === 'neglected' && (
-          <>
-            <line x1="29" y1="32" x2="43" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" />
-            <line x1="71" y1="32" x2="57" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" />
-          </>
-        )}
-
-        {/* NOSE */}
-        <ellipse cx="50" cy="49" rx="5" ry="3.5" fill={nose} />
-        <ellipse cx="48.5" cy="48" rx="2" ry="1.2" fill="rgba(255,255,255,0.3)" />
-
-        {/* MOUTH */}
-        <path d={mouthPath} fill="none" stroke={nose} strokeWidth="1.8" strokeLinecap="round" />
-
-        {/* TONGUE */}
-        {showTongue && (
-          <g style={{ transformOrigin: '50px 58px', animation: 'tongueWag 1s ease-in-out infinite' }}>
-            <ellipse cx="50" cy="60" rx="4" ry="5" fill={tongue} stroke="#e55a7a" strokeWidth="0.8" />
-            <line x1="50" y1="56" x2="50" y2="63" stroke="#e55a7a" strokeWidth="0.6" />
-          </g>
-        )}
-
-        {/* TEARS */}
-        {showTears && (
-          <>
-            <ellipse cx="30" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation: 'tearDrip 2s ease-in-out infinite' }} />
-            {state === 'neglected' && (
-              <ellipse cx="70" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation: 'tearDrip 2s ease-in-out infinite 0.8s' }} />
-            )}
-          </>
-        )}
-
-        {/* ============ HEAD ACCESSORIES ============ */}
-
-        {/* SUNGLASSES */}
-        {acc.includes('sunglasses') && (
-          <g>
-            <rect x="28" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
-            <rect x="56" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
-            <line x1="44" y1="40" x2="56" y2="40" stroke="#475569" strokeWidth="1.5" />
-            <line x1="28" y1="38" x2="20" y2="36" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="72" y1="38" x2="80" y2="36" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
-            <rect x="30" y="37" width="4" height="3" rx="1" fill="rgba(255,255,255,0.12)" />
-            <rect x="58" y="37" width="4" height="3" rx="1" fill="rgba(255,255,255,0.12)" />
-          </g>
-        )}
-
-        {/* NINJA MASK */}
-        {acc.includes('ninja_mask') && (
-          <rect x="30" y="47" width="40" height="14" rx="5" fill="#1f2937" opacity="0.85" />
-        )}
-
-        {/* NINJA HEADBAND */}
-        {acc.includes('ninja_headband') && (
-          <g>
-            <rect x="18" y="28" width="64" height="7" rx="3.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" />
-            <path d="M82,29 Q92,27 97,32" stroke="#dc2626" strokeWidth="4.5" fill="none" strokeLinecap="round" />
-            <path d="M82,33 Q90,34 95,40" stroke="#b91c1c" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-          </g>
-        )}
-
-        {/* CROWN */}
-        {acc.includes('crown') && (
-          <g transform="translate(50, 10)">
-            <polygon points="-16,12 -12,0 -6,8 0,-6 6,8 12,0 16,12" fill="#fbbf24" stroke="#d97706" strokeWidth="1.2" />
-            <rect x="-16" y="10" width="32" height="5" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
-            <circle cx="-10" cy="2" r="2" fill="#ef4444" />
-            <circle cx="0" cy="-4" r="2" fill="#3b82f6" />
-            <circle cx="10" cy="2" r="2" fill="#22c55e" />
-          </g>
-        )}
-
-        {/* TINY SWORD (held to the right) */}
-        {acc.includes('tiny_sword') && (
-          <g transform="translate(84, 55) rotate(-35)">
-            <rect x="-2" y="-24" width="4" height="22" rx="1.5" fill="#d1d5db" stroke="#9ca3af" strokeWidth="0.8" />
-            <polygon points="-2,-24 2,-24 0,-30" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.8" />
-            <rect x="-1" y="-25" width="2" height="18" rx="0.5" fill="#f3f4f6" opacity="0.4" />
-            <rect x="-6" y="-2" width="12" height="3.5" rx="1.5" fill="#d97706" stroke="#92400e" strokeWidth="0.8" />
-            <rect x="-1.5" y="1.5" width="3" height="10" rx="1.5" fill="#78350f" />
-            <line x1="-0.5" y1="3" x2="-0.5" y2="9" stroke="#5c2d05" strokeWidth="0.6" />
-            <line x1="0.5" y1="4" x2="0.5" y2="8" stroke="#5c2d05" strokeWidth="0.4" />
-          </g>
-        )}
-      </svg>
-
-      {/* Status text */}
-      <div style={{ fontSize: '14px', marginTop: '4px', opacity: 0.7, fontWeight: 600 }}>
-        {state === 'thriving' && '✨ Happy!'}
-        {state === 'content' && '😊'}
-        {state === 'hungry' && '🍖 Hungry...'}
-        {state === 'thirsty' && '💧 Thirsty...'}
-        {state === 'sad' && '😢 Sad...'}
-        {state === 'neglected' && '😿 Feed me!'}
-      </div>
-    </div>
-  );
-}
-
 // --- Puppy Room (SVG Scene) ---
-function PuppyRoom({ room, pet, onPet }) {
+function PuppyRoom({ room, pet, onPet, isPetting = false }) {
   const items = room.purchasedItems || [];
   const isDojo = items.includes('ninja_dojo_makeover');
 
@@ -2047,10 +1676,8 @@ function PuppyRoom({ room, pet, onPet }) {
       )}
 
       {/* ===== PUPPY (centered) ===== */}
-      <g transform="translate(200, 220)">
-        <g transform="scale(0.85) translate(-50, -60)">
-          <PuppySVGInline pet={pet} onPet={onPet} />
-        </g>
+      <g transform="translate(200, 235)">
+        <PuppySVGInline pet={pet} isPetting={isPetting} />
       </g>
 
       {/* ===== FLOOR-R ZONE (x: 280-385, y: 200-275) ===== */}
@@ -2181,7 +1808,17 @@ function PuppyRoom({ room, pet, onPet }) {
 }
 
 // Inline SVG puppy for use inside PuppyRoom (no wrapper div, no click handler — room handles that)
-function PuppySVGInline({ pet }) {
+const PUPPY_IMAGES = {
+  thriving: '/assets/puppy-happy.png',
+  content: '/assets/puppy-content.png',
+  hungry: '/assets/puppy-sad.png',
+  thirsty: '/assets/puppy-sad.png',
+  sad: '/assets/puppy-sad.png',
+  neglected: '/assets/puppy-neglected.png',
+  pet: '/assets/puppy-pet.png',
+};
+
+function PuppySVGInline({ pet, isPetting }) {
   const getState = () => {
     if (pet.hunger < 10 && pet.thirst < 10) return 'neglected';
     if (pet.hunger < 30) return 'hungry';
@@ -2191,135 +1828,21 @@ function PuppySVGInline({ pet }) {
     return 'content';
   };
   const state = getState();
-  const acc = pet.purchasedItems || [];
-  const fur = '#c08040', furDark = '#9a6530', furLight = '#f5deb3', earPink = '#f5a0b0', nose = '#2d1b0e', tongue = '#ff6b8a', stroke = '#8b5e3c', sw = 1.5;
-  const eyeRY = { thriving: 10, content: 10, hungry: 11, thirsty: 9, sad: 5, neglected: 3 }[state];
-  const showTongue = state === 'thriving' || state === 'thirsty';
-  const showTears = state === 'sad' || state === 'neglected';
-  const earsDown = state === 'sad' || state === 'neglected';
-  const mouthPath = {
-    thriving: 'M40,54 Q50,63 60,54', content: 'M42,54 Q50,59 58,54', hungry: 'M44,55 Q50,55 56,55',
-    thirsty: 'M42,53 Q50,59 58,53', sad: 'M43,57 Q50,53 57,57', neglected: 'M42,58 Q50,53 58,58',
-  }[state];
+  const src = isPetting ? PUPPY_IMAGES.pet : PUPPY_IMAGES[state];
+  const imgSize = 100;
 
   return (
-    <g style={{ animation: state === 'thriving' ? 'bounce 2s infinite' : state === 'neglected' ? 'shiver 0.3s infinite' : 'none' }}>
-      {/* Cape */}
-      {acc.includes('cape') && (
-        <g style={{ transformOrigin: '50px 74px', animation: 'capeFlutter 2s ease-in-out infinite' }}>
-          <path d="M30,74 Q50,70 70,74 L78,114 Q50,120 22,114 Z" fill="#dc2626" stroke="#b91c1c" strokeWidth={sw} />
-        </g>
-      )}
-      {/* Tail */}
-      <g style={{ transformOrigin: '80px 82px', animation: (state==='thriving'||state==='content') ? 'tailWag 0.4s ease-in-out infinite alternate' : 'none' }}>
-        <path d="M78,84 Q88,70 82,60" fill="none" stroke={fur} strokeWidth="8" strokeLinecap="round" />
-        <circle cx="82" cy="60" r="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-      </g>
-      {/* Back legs */}
-      <rect x="32" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
-      <rect x="58" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
-      <ellipse cx="37" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-      <ellipse cx="63" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-      {/* Body */}
-      <g style={{ transformOrigin: '50px 90px', animation: 'breathe 3s ease-in-out infinite' }}>
-        <ellipse cx="50" cy="90" rx="24" ry="18" fill={fur} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="50" cy="84" rx="14" ry="10" fill={furLight} opacity="0.6" />
-        <ellipse cx="50" cy="96" rx="14" ry="9" fill={furLight} />
-      </g>
-      {/* Ninja outfit */}
-      {acc.includes('full_ninja_outfit') && (
-        <g><ellipse cx="50" cy="90" rx="23" ry="17" fill="#1f2937" opacity="0.7" /><rect x="27" y="88" width="46" height="4" rx="2" fill="#92400e" /></g>
-      )}
-      {/* Bandana */}
-      {acc.includes('bandana') && (
-        <g><path d="M28,72 Q50,68 72,72 L70,77 Q50,73 30,77 Z" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" /><polygon points="46,77 54,77 50,90" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" /></g>
-      )}
-      {/* Collar+bell */}
-      {acc.includes('collar_bell') && (
-        <g>
-          <path d={`M28,${acc.includes('bandana')?77:73} Q50,${acc.includes('bandana')?73:69} 72,${acc.includes('bandana')?77:73} L72,${acc.includes('bandana')?81:77} Q50,${acc.includes('bandana')?77:73} 28,${acc.includes('bandana')?81:77} Z`} fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" />
-          <g style={{ transformOrigin: `50px ${acc.includes('bandana')?81:77}px`, animation: 'bellSwing 2s ease-in-out infinite' }}>
-            <circle cx="50" cy={acc.includes('bandana')?85:81} r="4.5" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
-          </g>
-        </g>
-      )}
-      {/* Bow tie */}
-      {acc.includes('bow_tie') && (
-        <g transform="translate(50, 78)"><polygon points="-10,-5 0,0 -10,5" fill="#ef4444" /><polygon points="10,-5 0,0 10,5" fill="#ef4444" /><circle cx="0" cy="0" r="2.5" fill="#dc2626" /></g>
-      )}
-      {/* Front legs */}
-      <rect x="36" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-      <rect x="54" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
-      <ellipse cx="41" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-      <ellipse cx="59" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
-      {/* Sneakers */}
-      {acc.includes('sneakers') && (
-        <g><rect x="33" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" /><rect x="51" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" /></g>
-      )}
-      {/* Ears */}
-      <g style={{ transformOrigin:'26px 28px', animation:earsDown?'none':'earBounce 3s ease-in-out infinite', transform:earsDown?'rotate(25deg) translateY(8px)':'rotate(0deg)' }}>
-        <ellipse cx="22" cy="20" rx="13" ry="18" transform="rotate(-15,22,20)" fill={fur} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="22" cy="20" rx="7" ry="12" transform="rotate(-15,22,20)" fill={earPink} opacity="0.5" />
-      </g>
-      <g style={{ transformOrigin:'74px 28px', animation:earsDown?'none':'earBounce 3s ease-in-out infinite 0.5s', transform:earsDown?'rotate(-25deg) translateY(8px)':'rotate(0deg)' }}>
-        <ellipse cx="78" cy="20" rx="13" ry="18" transform="rotate(15,78,20)" fill={fur} stroke={stroke} strokeWidth={sw} />
-        <ellipse cx="78" cy="20" rx="7" ry="12" transform="rotate(15,78,20)" fill={earPink} opacity="0.5" />
-      </g>
-      {/* Head */}
-      <circle cx="50" cy="42" r="32" fill={fur} stroke={stroke} strokeWidth={sw} />
-      <ellipse cx="44" cy="30" rx="16" ry="10" fill={furLight} opacity="0.25" />
-      {/* Cheeks */}
-      {(state==='thriving'||state==='content') && (<><ellipse cx="24" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" /><ellipse cx="76" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" /></>)}
-      {/* Muzzle */}
-      <ellipse cx="50" cy="52" rx="16" ry="12" fill={furLight} stroke={stroke} strokeWidth={sw*0.6} />
-      {/* Eyes — big & glossy */}
-      <g style={{ transformOrigin:'50px 39px', animation:(state==='content'||state==='thriving')?'happyEyes 4s ease-in-out infinite':'none' }}>
-        <ellipse cx="38" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw*0.6} />
-        {state!=='sad'&&state!=='neglected'&&(<><circle cx="39.5" cy={39+(eyeRY>7?1.5:0)} r={Math.min(eyeRY*0.5,5.5)} fill={nose} /><circle cx="36.5" cy={39-eyeRY*0.28} r={Math.min(eyeRY*0.25,2.5)} fill="#fff" /><circle cx="41" cy={39+eyeRY*0.15} r="1" fill="#fff" /></>)}
-        {(state==='sad'||state==='neglected')&&<line x1="30" y1="39" x2="46" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />}
-        <ellipse cx="62" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw*0.6} />
-        {state!=='sad'&&state!=='neglected'&&(<><circle cx="60.5" cy={39+(eyeRY>7?1.5:0)} r={Math.min(eyeRY*0.5,5.5)} fill={nose} /><circle cx="63.5" cy={39-eyeRY*0.28} r={Math.min(eyeRY*0.25,2.5)} fill="#fff" /><circle cx="59" cy={39+eyeRY*0.15} r="1" fill="#fff" /></>)}
-        {(state==='sad'||state==='neglected')&&<line x1="54" y1="39" x2="70" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />}
-      </g>
-      {/* Brows */}
-      {state==='sad'&&(<><line x1="30" y1="33" x2="42" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" /><line x1="70" y1="33" x2="58" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" /></>)}
-      {state==='neglected'&&(<><line x1="29" y1="32" x2="43" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" /><line x1="71" y1="32" x2="57" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" /></>)}
-      {/* Nose */}
-      <ellipse cx="50" cy="49" rx="5" ry="3.5" fill={nose} />
-      <ellipse cx="48.5" cy="48" rx="2" ry="1.2" fill="rgba(255,255,255,0.3)" />
-      {/* Mouth */}
-      <path d={mouthPath} fill="none" stroke={nose} strokeWidth="1.8" strokeLinecap="round" />
-      {/* Tongue */}
-      {showTongue && (
-        <g style={{ transformOrigin:'50px 58px', animation:'tongueWag 1s ease-in-out infinite' }}>
-          <ellipse cx="50" cy="60" rx="4" ry="5" fill={tongue} stroke="#e55a7a" strokeWidth="0.8" />
-          <line x1="50" y1="56" x2="50" y2="63" stroke="#e55a7a" strokeWidth="0.6" />
-        </g>
-      )}
-      {/* Tears */}
-      {showTears && (
-        <><ellipse cx="30" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation:'tearDrip 2s ease-in-out infinite' }} />
-        {state==='neglected'&&<ellipse cx="70" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation:'tearDrip 2s ease-in-out infinite 0.8s' }} />}</>
-      )}
-      {/* Sunglasses */}
-      {acc.includes('sunglasses') && (
-        <g><rect x="28" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" /><rect x="56" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" /><line x1="44" y1="40" x2="56" y2="40" stroke="#475569" strokeWidth="1.5" /></g>
-      )}
-      {/* Ninja mask */}
-      {acc.includes('ninja_mask') && <rect x="30" y="47" width="40" height="14" rx="5" fill="#1f2937" opacity="0.85" />}
-      {/* Headband */}
-      {acc.includes('ninja_headband') && (
-        <g><rect x="18" y="28" width="64" height="7" rx="3.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" /><path d="M82,29 Q92,27 97,32" stroke="#dc2626" strokeWidth="4.5" fill="none" strokeLinecap="round" /></g>
-      )}
-      {/* Crown */}
-      {acc.includes('crown') && (
-        <g transform="translate(50, 10)"><polygon points="-16,12 -12,0 -6,8 0,-6 6,8 12,0 16,12" fill="#fbbf24" stroke="#d97706" strokeWidth="1.2" /><rect x="-16" y="10" width="32" height="5" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" /><circle cx="-10" cy="2" r="2" fill="#ef4444" /><circle cx="0" cy="-4" r="2" fill="#3b82f6" /><circle cx="10" cy="2" r="2" fill="#22c55e" /></g>
-      )}
-      {/* Sword */}
-      {acc.includes('tiny_sword') && (
-        <g transform="translate(84, 55) rotate(-35)"><rect x="-2" y="-24" width="4" height="22" rx="1.5" fill="#d1d5db" stroke="#9ca3af" strokeWidth="0.8" /><polygon points="-2,-24 2,-24 0,-30" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.8" /><rect x="-6" y="-2" width="12" height="3.5" rx="1.5" fill="#d97706" stroke="#92400e" strokeWidth="0.8" /><rect x="-1.5" y="1.5" width="3" height="10" rx="1.5" fill="#78350f" /></g>
-      )}
-    </g>
+    <image
+      href={src}
+      x={-imgSize / 2}
+      y={-imgSize / 2}
+      width={imgSize}
+      height={imgSize}
+      style={{
+        animation: state === 'thriving' ? 'bounce 2s infinite' : state === 'neglected' ? 'shiver 0.3s infinite' : 'none',
+        filter: state === 'neglected' ? 'saturate(0.7) brightness(0.9)' : 'none',
+      }}
+    />
   );
 }
 
@@ -2329,6 +1852,7 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
   const [petCount, setPetCount] = useState(0);
   const [buyAnimation, setBuyAnimation] = useState(null);
   const [wiggle, setWiggle] = useState(false);
+  const [isPetting, setIsPetting] = useState(false);
   const [hearts, setHearts] = useState([]);
   const heartIdRef = useRef(0);
 
@@ -2347,9 +1871,11 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
       saveState(newState);
     }
     setPetCount(prev => prev + 1);
-    // Hearts + wiggle
+    // Hearts + wiggle + pet image
     setWiggle(true);
+    setIsPetting(true);
     setTimeout(() => setWiggle(false), 600);
+    setTimeout(() => setIsPetting(false), 1200);
     const newHearts = Array.from({ length: 3 }, () => ({
       id: heartIdRef.current++,
       x: randInt(-60, 60),
@@ -2510,7 +2036,7 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
               zIndex: 20,
             }}>❤️</div>
           ))}
-          <PuppyRoom room={gameState.room} pet={gameState.pet} onPet={handlePetPuppy} />
+          <PuppyRoom room={gameState.room} pet={gameState.pet} onPet={handlePetPuppy} isPetting={isPetting} />
           <div style={{ textAlign: 'center', fontSize: '13px', opacity: 0.5, marginTop: '4px' }}>
             Tap me! 👆
           </div>
@@ -2539,7 +2065,6 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
   const tabs = [
     { id: 'consumables', label: '🍖 Food' },
     { id: 'necessities', label: '🏠 Stuff' },
-    { id: 'accessories', label: '✨ Outfit' },
     { id: 'room', label: '🪑 Room' },
   ];
 
@@ -2548,7 +2073,6 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
     return Object.entries(SHOP_ITEMS).filter(([_, item]) => {
       if (tab === 'consumables') return item.category === 'consumables';
       if (tab === 'necessities') return item.category === 'necessities' || item.category === 'upgrades';
-      if (tab === 'accessories') return item.category === 'accessories';
       return false;
     });
   };
@@ -2852,59 +2376,16 @@ const globalCSS = `
     50% { transform: translateY(-8px); }
   }
 
-  @keyframes tailWag {
-    0% { transform: rotate(-15deg); }
-    100% { transform: rotate(15deg); }
-  }
-
   @keyframes floatUp {
     0% { opacity: 0; transform: translateY(0) scale(0.5); }
     20% { opacity: 1; transform: translateY(-10px) scale(1); }
     100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
   }
 
-  @keyframes earBounce {
-    0%, 100% { transform: rotate(0deg) translateY(0); }
-    30% { transform: rotate(-4deg) translateY(-2px); }
-    60% { transform: rotate(3deg) translateY(-1px); }
-  }
-
-  @keyframes happyEyes {
-    0%, 90%, 100% { transform: scaleY(1); }
-    95% { transform: scaleY(0.1); }
-  }
-
-  @keyframes tongueWag {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(2px); }
-  }
-
-  @keyframes breathe {
-    0%, 100% { transform: scaleY(1); }
-    50% { transform: scaleY(1.03); }
-  }
-
   @keyframes shiver {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-1px); }
     75% { transform: translateX(1px); }
-  }
-
-  @keyframes tearDrip {
-    0% { opacity: 0; transform: translateY(0); }
-    20% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(8px); }
-  }
-
-  @keyframes bellSwing {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-8deg); }
-    75% { transform: rotate(8deg); }
-  }
-
-  @keyframes capeFlutter {
-    0%, 100% { transform: skewX(0deg); }
-    50% { transform: skewX(3deg); }
   }
 
   @keyframes fairyPulse {
