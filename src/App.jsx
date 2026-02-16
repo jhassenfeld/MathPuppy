@@ -86,6 +86,71 @@ const SHOP_ITEMS = {
   ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'accessories', effect: 'Ninja home! ⛩️', icon: '⛩️', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
 };
 
+// ============================================================================
+// ROOM DECORATION ITEMS
+// ============================================================================
+
+const WALL_PAINTS = {
+  warm_beige: { name: 'Warm Beige', cost: 30, color: '#d4b896', icon: '🟤' },
+  sky_blue: { name: 'Sky Blue', cost: 35, color: '#87ceeb', icon: '🔵' },
+  mint_green: { name: 'Mint Green', cost: 35, color: '#98d4a8', icon: '🟢' },
+  sunset_orange: { name: 'Sunset Orange', cost: 40, color: '#f4a460', icon: '🟠' },
+  lavender: { name: 'Lavender', cost: 40, color: '#c4a8d8', icon: '🟣' },
+};
+
+const WALLPAPERS = {
+  star_pattern: { name: 'Star Wallpaper', cost: 80, pattern: 'stars', icon: '⭐' },
+  stripe_pattern: { name: 'Stripe Wallpaper', cost: 90, pattern: 'stripes', icon: '📏' },
+  ninja_pattern: { name: 'Ninja Wallpaper', cost: 150, pattern: 'ninja', icon: '🥷' },
+};
+
+const FLOOR_OPTIONS = {
+  wood_floor: { name: 'Wood Floor', cost: 60, color: '#a0785a', icon: '🪵' },
+  carpet_floor: { name: 'Soft Carpet', cost: 80, color: '#7ea8c4', icon: '🟦' },
+  checkered_floor: { name: 'Checkered Tile', cost: 100, color: '#ddd', pattern: 'checkered', icon: '⬜' },
+  tatami_floor: { name: 'Tatami Mats', cost: 120, color: '#c4b78c', pattern: 'tatami', icon: '🟫' },
+};
+
+const ROOM_ITEMS = {
+  // --- Furniture (FLOOR zones) ---
+  small_rug: { name: 'Small Rug', cost: 60, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 3, icon: '🟫', replaces: null },
+  large_rug: { name: 'Large Rug', cost: 120, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 6, icon: '🟥', replaces: 'small_rug' },
+  bean_bag: { name: 'Bean Bag', cost: 100, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 5, icon: '🫘' },
+  armchair: { name: 'Armchair', cost: 180, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 8, icon: '🪑', replaces: 'bean_bag' },
+  couch: { name: 'Couch', cost: 300, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 12, icon: '🛋️', replaces: 'armchair' },
+  bookshelf: { name: 'Bookshelf', cost: 150, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 7, icon: '📚' },
+  side_table: { name: 'Side Table', cost: 80, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 4, icon: '🪑' },
+  lamp: { name: 'Lamp', cost: 100, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 5, icon: '💡', requires: 'side_table' },
+  toy_basket: { name: 'Toy Basket', cost: 80, category: 'furniture', zone: 'FRONT-R', happinessBoost: 4, icon: '🧺' },
+
+  // --- Wall Decor ---
+  paw_poster: { name: 'Paw Poster', cost: 60, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 3, icon: '🐾' },
+  space_poster: { name: 'Space Poster', cost: 80, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '🚀' },
+  ninja_poster: { name: 'Ninja Poster', cost: 100, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 5, icon: '🥋' },
+  clock: { name: 'Clock', cost: 70, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 3, icon: '🕐' },
+  small_shelf: { name: 'Wall Shelf', cost: 90, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '📦' },
+  picture_frame: { name: 'Picture Frame', cost: 60, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 3, icon: '🖼️' },
+  fairy_lights: { name: 'Fairy Lights', cost: 120, category: 'wall_decor', zone: 'CEILING', happinessBoost: 6, icon: '✨' },
+  hanging_plant: { name: 'Hanging Plant', cost: 80, category: 'wall_decor', zone: 'CEILING', happinessBoost: 4, icon: '🪴' },
+  banner: { name: 'Banner', cost: 70, category: 'wall_decor', zone: 'CEILING', happinessBoost: 3, icon: '🎏' },
+
+  // --- Electronics & Fun ---
+  radio: { name: 'Radio', cost: 100, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 5, icon: '📻' },
+  tv: { name: 'TV', cost: 250, category: 'electronics', zone: 'WALL-C', happinessBoost: 10, icon: '📺' },
+  gaming_console: { name: 'Gaming Console', cost: 200, category: 'electronics', zone: 'WALL-C', happinessBoost: 8, icon: '🎮', requires: 'tv' },
+  lava_lamp: { name: 'Lava Lamp', cost: 120, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 6, icon: '🫧' },
+  disco_ball: { name: 'Disco Ball', cost: 180, category: 'electronics', zone: 'CEILING', happinessBoost: 8, icon: '🪩' },
+  fish_tank: { name: 'Fish Tank', cost: 200, category: 'electronics', zone: 'FLOOR-L', happinessBoost: 10, icon: '🐠' },
+
+  // --- Premium / Aspirational ---
+  ball_pit: { name: 'Ball Pit', cost: 400, category: 'premium', zone: 'FLOOR-C', happinessBoost: 15, icon: '🔴' },
+  tiny_trampoline: { name: 'Trampoline', cost: 350, category: 'premium', zone: 'FLOOR-R', happinessBoost: 12, icon: '🤸' },
+  skateboard_ramp: { name: 'Skate Ramp', cost: 300, category: 'premium', zone: 'FLOOR-L', happinessBoost: 12, icon: '🛹' },
+  ninja_dummy: { name: 'Ninja Dummy', cost: 350, category: 'premium', zone: 'FLOOR-L', happinessBoost: 12, icon: '🥊' },
+  rocket_toy: { name: 'Rocket Ship', cost: 400, category: 'premium', zone: 'FLOOR-R', happinessBoost: 15, icon: '🚀' },
+  ninja_dojo_makeover: { name: 'Ninja Dojo!', cost: 800, category: 'premium', zone: 'FULL', happinessBoost: 25, icon: '⛩️' },
+};
+
 const DEFAULT_STATE = {
   coins: 0,
   pet: {
@@ -94,6 +159,12 @@ const DEFAULT_STATE = {
     happiness: 80,
     purchasedItems: [],
     roomTheme: 'default',
+  },
+  room: {
+    purchasedItems: [],
+    wallPaint: null,
+    wallpaper: null,
+    flooring: null,
   },
   progress: {
     addSub20: { currentWave: 1, highScore: 0, bestStreak: 0 },
@@ -112,7 +183,13 @@ function loadState() {
     const saved = localStorage.getItem('mathNinjaState');
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...DEFAULT_STATE, ...parsed, pet: { ...DEFAULT_STATE.pet, ...parsed.pet }, progress: { ...DEFAULT_STATE.progress, ...parsed.progress } };
+      return {
+        ...DEFAULT_STATE,
+        ...parsed,
+        pet: { ...DEFAULT_STATE.pet, ...parsed.pet },
+        room: { ...DEFAULT_STATE.room, ...(parsed.room || {}) },
+        progress: { ...DEFAULT_STATE.progress, ...parsed.progress },
+      };
     }
   } catch (e) { /* ignore */ }
   return { ...DEFAULT_STATE };
@@ -1319,7 +1396,7 @@ function Puppy({ pet, size = 120, onPet }) {
   const sw = 1.5; // stroke width
 
   // Mood-driven visuals
-  const eyeRY = { thriving: 8, content: 8, hungry: 9, thirsty: 7, sad: 4, neglected: 2.5 }[state];
+  const eyeRY = { thriving: 10, content: 10, hungry: 11, thirsty: 9, sad: 5, neglected: 3 }[state];
   const showTongue = state === 'thriving' || state === 'thirsty';
   const showTears = state === 'sad' || state === 'neglected';
   const earsDown = state === 'sad' || state === 'neglected';
@@ -1498,32 +1575,32 @@ function Puppy({ pet, size = 120, onPet }) {
         {/* MUZZLE */}
         <ellipse cx="50" cy="52" rx="16" ry="12" fill={furLight} stroke={stroke} strokeWidth={sw * 0.6} />
 
-        {/* EYES */}
-        <g style={{ transformOrigin: '50px 40px', animation: (state === 'content' || state === 'thriving') ? 'happyEyes 4s ease-in-out infinite' : 'none' }}>
+        {/* EYES — big & glossy Paw Patrol style */}
+        <g style={{ transformOrigin: '50px 39px', animation: (state === 'content' || state === 'thriving') ? 'happyEyes 4s ease-in-out infinite' : 'none' }}>
           {/* Left eye */}
-          <ellipse cx="38" cy="40" rx="7" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
+          <ellipse cx="38" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
           {state !== 'sad' && state !== 'neglected' && (
             <>
-              <circle cx="39.5" cy={40 + (eyeRY > 6 ? 1 : 0)} r={Math.min(eyeRY * 0.55, 4.5)} fill={nose} />
-              <circle cx={38} cy={40 - eyeRY * 0.25} r={Math.min(eyeRY * 0.25, 2)} fill="#fff" />
-              {state === 'thriving' && <circle cx="41" cy={41.5} r="0.8" fill="#fff" />}
+              <circle cx="39.5" cy={39 + (eyeRY > 7 ? 1.5 : 0)} r={Math.min(eyeRY * 0.5, 5.5)} fill={nose} />
+              <circle cx="36.5" cy={39 - eyeRY * 0.28} r={Math.min(eyeRY * 0.25, 2.5)} fill="#fff" />
+              <circle cx="41" cy={39 + eyeRY * 0.15} r="1" fill="#fff" />
             </>
           )}
           {(state === 'sad' || state === 'neglected') && (
-            <line x1="32" y1="40" x2="44" y2="40" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+            <line x1="30" y1="39" x2="46" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />
           )}
 
           {/* Right eye */}
-          <ellipse cx="62" cy="40" rx="7" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
+          <ellipse cx="62" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw * 0.6} />
           {state !== 'sad' && state !== 'neglected' && (
             <>
-              <circle cx="60.5" cy={40 + (eyeRY > 6 ? 1 : 0)} r={Math.min(eyeRY * 0.55, 4.5)} fill={nose} />
-              <circle cx={62} cy={40 - eyeRY * 0.25} r={Math.min(eyeRY * 0.25, 2)} fill="#fff" />
-              {state === 'thriving' && <circle cx="59" cy={41.5} r="0.8" fill="#fff" />}
+              <circle cx="60.5" cy={39 + (eyeRY > 7 ? 1.5 : 0)} r={Math.min(eyeRY * 0.5, 5.5)} fill={nose} />
+              <circle cx="63.5" cy={39 - eyeRY * 0.28} r={Math.min(eyeRY * 0.25, 2.5)} fill="#fff" />
+              <circle cx="59" cy={39 + eyeRY * 0.15} r="1" fill="#fff" />
             </>
           )}
           {(state === 'sad' || state === 'neglected') && (
-            <line x1="56" y1="40" x2="68" y2="40" stroke={nose} strokeWidth="2" strokeLinecap="round" />
+            <line x1="54" y1="39" x2="70" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />
           )}
         </g>
 
@@ -1633,11 +1710,627 @@ function Puppy({ pet, size = 120, onPet }) {
   );
 }
 
+// --- Puppy Room (SVG Scene) ---
+function PuppyRoom({ room, pet, onPet }) {
+  const items = room.purchasedItems || [];
+  const isDojo = items.includes('ninja_dojo_makeover');
+
+  // Wall color
+  const wallColor = isDojo ? '#2d1810'
+    : room.wallPaint ? WALL_PAINTS[room.wallPaint]?.color || '#d4b896'
+    : '#d4b896';
+
+  // Floor color
+  const floorColor = isDojo ? '#8b7355'
+    : room.flooring ? (FLOOR_OPTIONS[room.flooring]?.color || '#b8956a')
+    : '#b8956a';
+
+  const floorPattern = isDojo ? 'tatami' : room.flooring ? (FLOOR_OPTIONS[room.flooring]?.pattern || null) : null;
+  const wallpaperPattern = isDojo ? null : room.wallpaper ? (WALLPAPERS[room.wallpaper]?.pattern || null) : null;
+
+  return (
+    <svg viewBox="0 0 400 300" style={{ width: '100%', maxWidth: '420px', borderRadius: '18px', overflow: 'hidden', display: 'block' }}>
+      <defs>
+        {/* Floor patterns */}
+        <pattern id="checkered" width="20" height="20" patternUnits="userSpaceOnUse">
+          <rect width="10" height="10" fill="#ccc" />
+          <rect x="10" y="10" width="10" height="10" fill="#ccc" />
+          <rect x="10" width="10" height="10" fill="#eee" />
+          <rect y="10" width="10" height="10" fill="#eee" />
+        </pattern>
+        <pattern id="tatami" width="40" height="20" patternUnits="userSpaceOnUse">
+          <rect width="40" height="20" fill="#c4b78c" />
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#b0a070" strokeWidth="0.8" />
+          <line x1="20" y1="0" x2="20" y2="20" stroke="#b0a070" strokeWidth="0.5" />
+        </pattern>
+        {/* Wallpaper patterns */}
+        <pattern id="wp-stars" width="30" height="30" patternUnits="userSpaceOnUse">
+          <polygon points="15,2 17,11 26,11 19,16 21,25 15,20 9,25 11,16 4,11 13,11" fill="rgba(255,255,255,0.08)" />
+        </pattern>
+        <pattern id="wp-stripes" width="12" height="12" patternUnits="userSpaceOnUse">
+          <rect width="6" height="12" fill="rgba(255,255,255,0.06)" />
+        </pattern>
+        <pattern id="wp-ninja" width="40" height="40" patternUnits="userSpaceOnUse">
+          <text x="12" y="25" fontSize="16" fill="rgba(255,255,255,0.06)" textAnchor="middle">⭐</text>
+        </pattern>
+      </defs>
+
+      {/* ===== BACK WALL ===== */}
+      <rect x="0" y="0" width="400" height="200" fill={wallColor} />
+
+      {/* Wallpaper overlay */}
+      {wallpaperPattern === 'stars' && <rect x="0" y="0" width="400" height="200" fill="url(#wp-stars)" />}
+      {wallpaperPattern === 'stripes' && <rect x="0" y="0" width="400" height="200" fill="url(#wp-stripes)" />}
+      {wallpaperPattern === 'ninja' && <rect x="0" y="0" width="400" height="200" fill="url(#wp-ninja)" />}
+
+      {/* Wall/floor divider line */}
+      <line x1="0" y1="200" x2="400" y2="200" stroke="rgba(0,0,0,0.15)" strokeWidth="2" />
+
+      {/* ===== FLOOR ===== */}
+      {floorPattern === 'checkered' ? (
+        <rect x="0" y="200" width="400" height="100" fill="url(#checkered)" />
+      ) : floorPattern === 'tatami' ? (
+        <rect x="0" y="200" width="400" height="100" fill="url(#tatami)" />
+      ) : (
+        <rect x="0" y="200" width="400" height="100" fill={floorColor} />
+      )}
+
+      {/* Floor wood lines (default/wood) */}
+      {!floorPattern && (
+        <g opacity="0.15">
+          <line x1="0" y1="225" x2="400" y2="225" stroke="#000" strokeWidth="0.5" />
+          <line x1="0" y1="250" x2="400" y2="250" stroke="#000" strokeWidth="0.5" />
+          <line x1="0" y1="275" x2="400" y2="275" stroke="#000" strokeWidth="0.5" />
+        </g>
+      )}
+
+      {/* Dojo decoration */}
+      {isDojo && (
+        <g>
+          {/* Bamboo wall panels */}
+          <rect x="5" y="10" width="12" height="185" rx="3" fill="#6b8e4e" opacity="0.4" />
+          <rect x="383" y="10" width="12" height="185" rx="3" fill="#6b8e4e" opacity="0.4" />
+          {/* Red sun */}
+          <circle cx="200" cy="60" r="35" fill="#dc2626" opacity="0.2" />
+          {/* Paper lanterns */}
+          <g>
+            <line x1="80" y1="0" x2="80" y2="25" stroke="#a16207" strokeWidth="1" />
+            <ellipse cx="80" cy="30" rx="10" ry="12" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
+            <rect x="74" y="20" width="12" height="3" rx="1" fill="#d97706" />
+          </g>
+          <g>
+            <line x1="320" y1="0" x2="320" y2="25" stroke="#a16207" strokeWidth="1" />
+            <ellipse cx="320" cy="30" rx="10" ry="12" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
+            <rect x="314" y="20" width="12" height="3" rx="1" fill="#d97706" />
+          </g>
+        </g>
+      )}
+
+      {/* ===== CEILING ZONE ===== */}
+
+      {/* Fairy Lights */}
+      {items.includes('fairy_lights') && (
+        <g>
+          <path d="M20,18 Q60,30 100,15 Q150,28 200,12 Q250,28 300,15 Q340,28 380,18" fill="none" stroke="#333" strokeWidth="1" />
+          {[50,100,150,200,250,300,350].map((x, i) => (
+            <circle key={i} cx={x} cy={15 + (i % 2) * 8} r="4" fill={['#ef4444','#fbbf24','#22c55e','#3b82f6','#a855f7','#ec4899','#f97316'][i]}
+              style={{ animation: `fairyPulse 2s ease-in-out ${i * 0.3}s infinite` }} />
+          ))}
+        </g>
+      )}
+
+      {/* Hanging Plant */}
+      {items.includes('hanging_plant') && (
+        <g>
+          <line x1="100" y1="0" x2="100" y2="20" stroke="#666" strokeWidth="1.5" />
+          <ellipse cx="100" cy="28" rx="12" ry="10" fill="#a0522d" stroke="#8b4513" strokeWidth="1.5" />
+          <ellipse cx="95" cy="22" rx="8" ry="6" fill="#22c55e" stroke="#16a34a" strokeWidth="1" />
+          <ellipse cx="105" cy="20" rx="6" ry="5" fill="#4ade80" stroke="#22c55e" strokeWidth="1" />
+          <path d="M92,25 Q85,35 88,42" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+          <ellipse cx="88" cy="43" rx="4" ry="3" fill="#4ade80" />
+        </g>
+      )}
+
+      {/* Banner */}
+      {items.includes('banner') && (
+        <g>
+          <line x1="130" y1="5" x2="270" y2="5" stroke="#92400e" strokeWidth="2" />
+          {[140,160,180,200,220,240,260].map((x, i) => (
+            <polygon key={i} points={`${x-8},8 ${x+8},8 ${x},28`}
+              fill={['#ef4444','#f97316','#fbbf24','#22c55e','#3b82f6','#a855f7','#ec4899'][i]}
+              stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
+          ))}
+        </g>
+      )}
+
+      {/* Disco Ball */}
+      {items.includes('disco_ball') && (
+        <g>
+          <line x1="200" y1="0" x2="200" y2="20" stroke="#9ca3af" strokeWidth="1.5" />
+          <circle cx="200" cy="30" r="12" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1.5" />
+          <rect x="194" y="22" width="4" height="4" rx="0.5" fill="#fff" opacity="0.6" />
+          <rect x="200" y="26" width="4" height="4" rx="0.5" fill="#fff" opacity="0.4" />
+          <rect x="196" y="30" width="3" height="3" rx="0.5" fill="#fff" opacity="0.5" />
+          <rect x="202" y="32" width="3" height="3" rx="0.5" fill="#fff" opacity="0.3" />
+          {/* Disco light rays */}
+          {[150,170,230,250].map((x, i) => (
+            <line key={i} x1="200" y1="30" x2={x} y2={80 + i * 15} stroke={['#ef4444','#3b82f6','#22c55e','#fbbf24'][i]}
+              strokeWidth="1" opacity="0.15" style={{ animation: `fairyPulse 3s ease-in-out ${i * 0.5}s infinite` }} />
+          ))}
+        </g>
+      )}
+
+      {/* ===== WALL-L ZONE (x: 25-100, y: 60-160) ===== */}
+
+      {/* Paw Poster */}
+      {items.includes('paw_poster') && (
+        <g>
+          <rect x="30" y="60" width="55" height="70" rx="4" fill="#fff8e7" stroke="#c4956a" strokeWidth="2" />
+          <text x="57" y="105" fontSize="30" textAnchor="middle">🐾</text>
+        </g>
+      )}
+
+      {/* Ninja Poster (replaces paw poster position if paw not owned) */}
+      {items.includes('ninja_poster') && !items.includes('paw_poster') && (
+        <g>
+          <rect x="30" y="60" width="55" height="70" rx="4" fill="#1f2937" stroke="#475569" strokeWidth="2" />
+          <text x="57" y="105" fontSize="28" textAnchor="middle">🥷</text>
+        </g>
+      )}
+      {items.includes('ninja_poster') && items.includes('paw_poster') && (
+        <g>
+          <rect x="30" y="135" width="50" height="55" rx="4" fill="#1f2937" stroke="#475569" strokeWidth="2" />
+          <text x="55" y="170" fontSize="24" textAnchor="middle">🥷</text>
+        </g>
+      )}
+
+      {/* ===== WALL-C ZONE (x: 140-260, y: 50-140) ===== */}
+
+      {/* TV */}
+      {items.includes('tv') && (
+        <g>
+          <rect x="150" y="55" width="100" height="65" rx="4" fill="#1e293b" stroke="#475569" strokeWidth="2.5" />
+          <rect x="156" y="60" width="88" height="52" rx="2" fill="#60a5fa" opacity="0.6" />
+          {/* TV stand */}
+          <rect x="190" y="120" width="20" height="8" rx="2" fill="#475569" />
+          <rect x="185" y="126" width="30" height="4" rx="2" fill="#475569" />
+          {/* Gaming console (below TV if owned) */}
+          {items.includes('gaming_console') && (
+            <g>
+              <rect x="180" y="132" width="40" height="14" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+              <circle cx="192" cy="139" r="2" fill="#22c55e" />
+              <rect x="200" y="136" width="12" height="3" rx="1" fill="#6b7280" />
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* ===== WALL-R ZONE (x: 300-380, y: 60-160) ===== */}
+
+      {/* Space Poster */}
+      {items.includes('space_poster') && (
+        <g>
+          <rect x="310" y="60" width="55" height="70" rx="4" fill="#0f172a" stroke="#475569" strokeWidth="2" />
+          <circle cx="327" cy="85" r="6" fill="#fbbf24" />
+          <circle cx="345" cy="95" r="4" fill="#60a5fa" />
+          <circle cx="330" cy="105" r="2" fill="#fff" />
+          <circle cx="350" cy="80" r="1.5" fill="#fff" />
+          <text x="337" y="120" fontSize="10" textAnchor="middle" fill="#fff" opacity="0.7">🚀</text>
+        </g>
+      )}
+
+      {/* Clock */}
+      {items.includes('clock') && (
+        <g>
+          <circle cx={items.includes('space_poster') ? 340 : 340} cy={items.includes('space_poster') ? 155 : 90} r="18" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+          <circle cx={items.includes('space_poster') ? 340 : 340} cy={items.includes('space_poster') ? 155 : 90} r="15" fill="#fff8e7" />
+          <line x1={items.includes('space_poster') ? 340 : 340} y1={items.includes('space_poster') ? 155 : 90}
+            x2={items.includes('space_poster') ? 340 : 340} y2={items.includes('space_poster') ? 143 : 78} stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={items.includes('space_poster') ? 340 : 340} y1={items.includes('space_poster') ? 155 : 90}
+            x2={items.includes('space_poster') ? 348 : 348} y2={items.includes('space_poster') ? 155 : 90} stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+        </g>
+      )}
+
+      {/* Picture Frame */}
+      {items.includes('picture_frame') && (
+        <g>
+          <rect x="310" y={items.includes('space_poster') && items.includes('clock') ? 100 : items.includes('space_poster') ? 140 : 120} width="40" height="35" rx="3" fill="#d4a574" stroke="#92400e" strokeWidth="2" />
+          <rect x="315" y={items.includes('space_poster') && items.includes('clock') ? 105 : items.includes('space_poster') ? 145 : 125} width="30" height="25" rx="1" fill="#87ceeb" />
+          <circle cx="330" cy={items.includes('space_poster') && items.includes('clock') ? 115 : items.includes('space_poster') ? 155 : 135} r="5" fill="#fbbf24" />
+        </g>
+      )}
+
+      {/* Wall Shelf */}
+      {items.includes('small_shelf') && (
+        <g>
+          <rect x="300" y="170" width="70" height="6" rx="2" fill="#a0785a" stroke="#8b6914" strokeWidth="1.5" />
+          <rect x="300" y="170" width="4" height="20" rx="1" fill="#a0785a" stroke="#8b6914" strokeWidth="1" />
+          <rect x="366" y="170" width="4" height="20" rx="1" fill="#a0785a" stroke="#8b6914" strokeWidth="1" />
+          {/* Little items on shelf */}
+          <circle cx="320" cy="166" r="5" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
+          <rect x="340" y="160" width="8" height="10" rx="1" fill="#3b82f6" stroke="#2563eb" strokeWidth="0.8" />
+        </g>
+      )}
+
+      {/* ===== FLOOR-L ZONE (x: 20-120, y: 200-275) ===== */}
+
+      {/* Bean Bag / Armchair / Couch (upgrades replace) */}
+      {items.includes('couch') ? (
+        <g>
+          <rect x="20" y="215" width="100" height="50" rx="12" fill="#6366f1" stroke="#4f46e5" strokeWidth="2.5" />
+          <rect x="24" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
+          <rect x="94" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
+          <ellipse cx="55" cy="235" rx="20" ry="8" fill="#818cf8" opacity="0.5" />
+          <ellipse cx="85" cy="235" rx="16" ry="7" fill="#818cf8" opacity="0.4" />
+        </g>
+      ) : items.includes('armchair') ? (
+        <g>
+          <rect x="35" y="220" width="65" height="50" rx="10" fill="#b45309" stroke="#92400e" strokeWidth="2.5" />
+          <rect x="30" y="215" width="18" height="55" rx="7" fill="#d97706" stroke="#b45309" strokeWidth="1.5" />
+          <rect x="88" y="215" width="18" height="55" rx="7" fill="#d97706" stroke="#b45309" strokeWidth="1.5" />
+          <ellipse cx="67" cy="240" rx="18" ry="8" fill="#d97706" opacity="0.5" />
+        </g>
+      ) : items.includes('bean_bag') ? (
+        <g>
+          <ellipse cx="65" cy="250" rx="35" ry="28" fill="#ec4899" stroke="#db2777" strokeWidth="2.5" />
+          <ellipse cx="60" cy="235" rx="20" ry="12" fill="#f472b6" opacity="0.5" />
+        </g>
+      ) : null}
+
+      {/* Bookshelf (if no seating, or on top if seating exists) */}
+      {items.includes('bookshelf') && (
+        <g transform={items.includes('couch') || items.includes('armchair') || items.includes('bean_bag') ? 'translate(0, 0)' : 'translate(0, 0)'}>
+          <rect x="25" y="130" width="50" height="65" rx="3" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
+          <line x1="28" y1="150" x2="72" y2="150" stroke="#8b6914" strokeWidth="1" />
+          <line x1="28" y1="170" x2="72" y2="170" stroke="#8b6914" strokeWidth="1" />
+          {/* Books */}
+          <rect x="30" y="133" width="8" height="15" rx="1" fill="#ef4444" />
+          <rect x="40" y="135" width="7" height="13" rx="1" fill="#3b82f6" />
+          <rect x="49" y="133" width="9" height="15" rx="1" fill="#22c55e" />
+          <rect x="60" y="136" width="6" height="12" rx="1" fill="#fbbf24" />
+          <rect x="30" y="153" width="10" height="15" rx="1" fill="#a855f7" />
+          <rect x="42" y="154" width="8" height="14" rx="1" fill="#ec4899" />
+          <rect x="52" y="153" width="7" height="15" rx="1" fill="#f97316" />
+        </g>
+      )}
+
+      {/* Fish Tank */}
+      {items.includes('fish_tank') && !items.includes('couch') && !items.includes('armchair') && (
+        <g>
+          <rect x="30" y="220" width="60" height="45" rx="4" fill="#bfdbfe" stroke="#60a5fa" strokeWidth="2" opacity="0.7" />
+          <rect x="28" y="216" width="64" height="6" rx="2" fill="#475569" />
+          <ellipse cx="50" cy="240" rx="6" ry="4" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
+          <ellipse cx="70" cy="245" rx="5" ry="3" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
+          <ellipse cx="45" cy="255" rx="10" ry="3" fill="#22c55e" opacity="0.5" />
+          <circle cx="55" cy="230" r="2" fill="#fff" opacity="0.4" />
+          <circle cx="65" cy="235" r="1.5" fill="#fff" opacity="0.3" />
+        </g>
+      )}
+
+      {/* Skateboard Ramp */}
+      {items.includes('skateboard_ramp') && !items.includes('couch') && !items.includes('armchair') && !items.includes('bean_bag') && (
+        <g>
+          <path d="M25,275 L25,230 Q60,230 100,260 L100,275 Z" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
+          <path d="M25,228 Q60,228 100,258" fill="none" stroke="#6b7280" strokeWidth="1.5" />
+        </g>
+      )}
+
+      {/* Ninja Dummy */}
+      {items.includes('ninja_dummy') && (
+        <g transform={items.includes('couch') || items.includes('armchair') || items.includes('bean_bag') ? 'translate(115, 0)' : 'translate(50, 0)'}>
+          <rect x="20" y="230" width="8" height="45" rx="2" fill="#92400e" />
+          <circle cx="24" cy="225" r="12" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+          <circle cx="20" cy="222" r="2" fill="#1e293b" />
+          <circle cx="28" cy="222" r="2" fill="#1e293b" />
+          <rect x="18" y="230" width="12" height="3" rx="1" fill="#dc2626" />
+        </g>
+      )}
+
+      {/* ===== FLOOR-C ZONE (Puppy Area, x: 140-260, y: 200-280) ===== */}
+
+      {/* Small/Large Rug (under puppy) */}
+      {items.includes('large_rug') ? (
+        <ellipse cx="200" cy="260" rx="70" ry="20" fill="#b91c1c" stroke="#991b1b" strokeWidth="2" opacity="0.7" />
+      ) : items.includes('small_rug') ? (
+        <ellipse cx="200" cy="260" rx="45" ry="14" fill="#92400e" stroke="#78350f" strokeWidth="1.5" opacity="0.6" />
+      ) : null}
+
+      {/* Ball Pit */}
+      {items.includes('ball_pit') && (
+        <g>
+          <rect x="155" y="245" width="90" height="30" rx="10" fill="#475569" stroke="#374151" strokeWidth="2" />
+          {[165,175,185,195,205,215,225,235].map((x, i) => (
+            <circle key={i} cx={x} cy={258 + (i % 2) * 5} r="6"
+              fill={['#ef4444','#3b82f6','#fbbf24','#22c55e','#a855f7','#ec4899','#f97316','#60a5fa'][i]} />
+          ))}
+        </g>
+      )}
+
+      {/* ===== PUPPY (centered) ===== */}
+      <g transform="translate(200, 220)">
+        <g transform="scale(0.85) translate(-50, -60)">
+          <PuppySVGInline pet={pet} onPet={onPet} />
+        </g>
+      </g>
+
+      {/* ===== FLOOR-R ZONE (x: 280-385, y: 200-275) ===== */}
+
+      {/* Side Table */}
+      {items.includes('side_table') && (
+        <g>
+          <rect x="310" y="230" width="50" height="40" rx="4" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
+          <rect x="305" y="226" width="60" height="6" rx="3" fill="#b8956a" stroke="#8b6914" strokeWidth="1.5" />
+          {/* Lamp on top */}
+          {items.includes('lamp') && (
+            <g>
+              <rect x="330" y="210" width="6" height="16" rx="2" fill="#d4a574" />
+              <polygon points="320,210 346,210 340,196 326,196" fill="#fef3c7" stroke="#d97706" strokeWidth="1" />
+              <circle cx="333" cy="203" r="3" fill="#fbbf24" opacity="0.6" style={{ animation: 'fairyPulse 3s ease-in-out infinite' }} />
+            </g>
+          )}
+        </g>
+      )}
+
+      {/* Radio */}
+      {items.includes('radio') && (
+        <g>
+          <rect x={items.includes('side_table') ? 315 : 310} y={items.includes('side_table') ? 215 : 240} width="35" height="22" rx="4" fill="#475569" stroke="#374151" strokeWidth="1.5" />
+          <circle cx={items.includes('side_table') ? 325 : 320} cy={items.includes('side_table') ? 228 : 253} r="6" fill="#6b7280" stroke="#4b5563" strokeWidth="1" />
+          <rect x={items.includes('side_table') ? 340 : 335} y={items.includes('side_table') ? 220 : 245} width="6" height="3" rx="1" fill="#22c55e" />
+          <line x1={items.includes('side_table') ? 332 : 327} y1={items.includes('side_table') ? 215 : 240}
+            x2={items.includes('side_table') ? 342 : 337} y2={items.includes('side_table') ? 205 : 230} stroke="#9ca3af" strokeWidth="1" />
+        </g>
+      )}
+
+      {/* Lava Lamp */}
+      {items.includes('lava_lamp') && (
+        <g>
+          <rect x="370" y="255" width="14" height="6" rx="2" fill="#6b7280" />
+          <rect x="373" y="230" width="8" height="25" rx="4" fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" opacity="0.8" />
+          <ellipse cx="377" cy="240" rx="3" ry="5" fill="#a855f7" opacity="0.6" style={{ animation: 'lavaFloat 4s ease-in-out infinite' }} />
+          <ellipse cx="377" cy="250" rx="2.5" ry="3" fill="#c084fc" opacity="0.5" style={{ animation: 'lavaFloat 4s ease-in-out 2s infinite' }} />
+        </g>
+      )}
+
+      {/* Tiny Trampoline */}
+      {items.includes('tiny_trampoline') && !items.includes('side_table') && (
+        <g>
+          <ellipse cx="340" cy="265" rx="30" ry="8" fill="#1e293b" stroke="#475569" strokeWidth="2" />
+          <ellipse cx="340" cy="260" rx="25" ry="5" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
+          <line x1="315" y1="262" x2="315" y2="275" stroke="#475569" strokeWidth="2" />
+          <line x1="365" y1="262" x2="365" y2="275" stroke="#475569" strokeWidth="2" />
+        </g>
+      )}
+
+      {/* Rocket Ship Toy */}
+      {items.includes('rocket_toy') && (
+        <g transform="translate(370, 215)">
+          <rect x="-8" y="0" width="16" height="40" rx="6" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1.5" />
+          <polygon points="-8,40 -14,50 8,40" fill="#ef4444" />
+          <polygon points="8,40 14,50 -8,40" fill="#ef4444" />
+          <polygon points="0,-8 -6,5 6,5" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
+          <circle cx="0" cy="18" r="5" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
+        </g>
+      )}
+
+      {/* ===== FRONT-L ZONE (x: 20-120, y: 270-295) ===== */}
+
+      {/* Food Bowl (existing item support) */}
+      {pet.purchasedItems.includes('food_bowl') && (
+        <g>
+          <ellipse cx="60" cy="282" rx="18" ry="6" fill="#e85d4a" stroke="#c0392b" strokeWidth="1.5" />
+          <rect x="42" y="276" width="36" height="6" rx="2" fill="#e85d4a" stroke="#c0392b" strokeWidth="1.5" />
+          <ellipse cx="60" cy="276" rx="18" ry="5" fill="#f97316" stroke="#c0392b" strokeWidth="1" />
+          {/* Kibble */}
+          <circle cx="53" cy="274" r="2.5" fill="#8b5e3c" />
+          <circle cx="60" cy="273" r="2" fill="#a0785a" />
+          <circle cx="67" cy="274" r="2.5" fill="#8b5e3c" />
+        </g>
+      )}
+
+      {/* Water Bowl */}
+      {pet.purchasedItems.includes('water_bowl') && (
+        <g>
+          <ellipse cx="105" cy="282" rx="16" ry="5" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
+          <rect x="89" y="277" width="32" height="5" rx="2" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
+          <ellipse cx="105" cy="277" rx="16" ry="4.5" fill="#60a5fa" stroke="#2563eb" strokeWidth="1" />
+          <ellipse cx="102" cy="276" rx="4" ry="2" fill="#93c5fd" opacity="0.5" />
+        </g>
+      )}
+
+      {/* ===== FRONT-R ZONE (x: 280-380, y: 270-295) ===== */}
+
+      {/* Toy Basket */}
+      {items.includes('toy_basket') && (
+        <g>
+          <rect x="320" y="270" width="40" height="22" rx="5" fill="#d4a574" stroke="#92400e" strokeWidth="1.5" />
+          <rect x="318" y="267" width="44" height="5" rx="2.5" fill="#b8956a" stroke="#92400e" strokeWidth="1" />
+          <circle cx="330" cy="278" r="5" fill="#ef4444" />
+          <circle cx="340" cy="280" r="4" fill="#3b82f6" />
+          <rect x="345" y="272" width="5" height="12" rx="1" fill="#22c55e" transform="rotate(15, 348, 278)" />
+        </g>
+      )}
+
+      {/* Bed (existing item) */}
+      {pet.purchasedItems.includes('bed') && (
+        <g>
+          <rect x="280" y="272" width="35" height="18" rx="6" fill="#7eb5d6" stroke="#5b9cc4" strokeWidth="1.5" />
+          <ellipse cx="297" cy="278" rx="12" ry="5" fill="#93c5fd" opacity="0.5" />
+          {pet.purchasedItems.includes('cozy_bed') && (
+            <>
+              <ellipse cx="290" cy="272" rx="8" ry="4" fill="#fef3c7" stroke="#d97706" strokeWidth="0.8" />
+              <rect x="282" y="282" width="30" height="6" rx="2" fill="#fecaca" opacity="0.6" />
+            </>
+          )}
+        </g>
+      )}
+
+      {/* Toy Ball & Chew Rope (existing items, in front) */}
+      {pet.purchasedItems.includes('toy_ball') && (
+        <circle cx="160" cy="285" r="8" fill="#ef4444" stroke="#dc2626" strokeWidth="1.5" />
+      )}
+      {pet.purchasedItems.includes('chew_rope') && (
+        <g>
+          <path d="M240,280 Q250,275 260,282 Q270,288 280,283" fill="none" stroke="#92400e" strokeWidth="4" strokeLinecap="round" />
+          <circle cx="240" cy="280" r="3" fill="#b45309" />
+          <circle cx="280" cy="283" r="3" fill="#b45309" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+// Inline SVG puppy for use inside PuppyRoom (no wrapper div, no click handler — room handles that)
+function PuppySVGInline({ pet }) {
+  const getState = () => {
+    if (pet.hunger < 10 && pet.thirst < 10) return 'neglected';
+    if (pet.hunger < 30) return 'hungry';
+    if (pet.thirst < 30) return 'thirsty';
+    if (pet.happiness < 30) return 'sad';
+    if (pet.hunger > 60 && pet.thirst > 60 && pet.happiness > 60) return 'thriving';
+    return 'content';
+  };
+  const state = getState();
+  const acc = pet.purchasedItems || [];
+  const fur = '#c08040', furDark = '#9a6530', furLight = '#f5deb3', earPink = '#f5a0b0', nose = '#2d1b0e', tongue = '#ff6b8a', stroke = '#8b5e3c', sw = 1.5;
+  const eyeRY = { thriving: 10, content: 10, hungry: 11, thirsty: 9, sad: 5, neglected: 3 }[state];
+  const showTongue = state === 'thriving' || state === 'thirsty';
+  const showTears = state === 'sad' || state === 'neglected';
+  const earsDown = state === 'sad' || state === 'neglected';
+  const mouthPath = {
+    thriving: 'M40,54 Q50,63 60,54', content: 'M42,54 Q50,59 58,54', hungry: 'M44,55 Q50,55 56,55',
+    thirsty: 'M42,53 Q50,59 58,53', sad: 'M43,57 Q50,53 57,57', neglected: 'M42,58 Q50,53 58,58',
+  }[state];
+
+  return (
+    <g style={{ animation: state === 'thriving' ? 'bounce 2s infinite' : state === 'neglected' ? 'shiver 0.3s infinite' : 'none' }}>
+      {/* Cape */}
+      {acc.includes('cape') && (
+        <g style={{ transformOrigin: '50px 74px', animation: 'capeFlutter 2s ease-in-out infinite' }}>
+          <path d="M30,74 Q50,70 70,74 L78,114 Q50,120 22,114 Z" fill="#dc2626" stroke="#b91c1c" strokeWidth={sw} />
+        </g>
+      )}
+      {/* Tail */}
+      <g style={{ transformOrigin: '80px 82px', animation: (state==='thriving'||state==='content') ? 'tailWag 0.4s ease-in-out infinite alternate' : 'none' }}>
+        <path d="M78,84 Q88,70 82,60" fill="none" stroke={fur} strokeWidth="8" strokeLinecap="round" />
+        <circle cx="82" cy="60" r="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+      </g>
+      {/* Back legs */}
+      <rect x="32" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
+      <rect x="58" y="96" width="10" height="18" rx="5" fill={furDark} stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="37" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="63" cy="114" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+      {/* Body */}
+      <g style={{ transformOrigin: '50px 90px', animation: 'breathe 3s ease-in-out infinite' }}>
+        <ellipse cx="50" cy="90" rx="24" ry="18" fill={fur} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="50" cy="84" rx="14" ry="10" fill={furLight} opacity="0.6" />
+        <ellipse cx="50" cy="96" rx="14" ry="9" fill={furLight} />
+      </g>
+      {/* Ninja outfit */}
+      {acc.includes('full_ninja_outfit') && (
+        <g><ellipse cx="50" cy="90" rx="23" ry="17" fill="#1f2937" opacity="0.7" /><rect x="27" y="88" width="46" height="4" rx="2" fill="#92400e" /></g>
+      )}
+      {/* Bandana */}
+      {acc.includes('bandana') && (
+        <g><path d="M28,72 Q50,68 72,72 L70,77 Q50,73 30,77 Z" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" /><polygon points="46,77 54,77 50,90" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" /></g>
+      )}
+      {/* Collar+bell */}
+      {acc.includes('collar_bell') && (
+        <g>
+          <path d={`M28,${acc.includes('bandana')?77:73} Q50,${acc.includes('bandana')?73:69} 72,${acc.includes('bandana')?77:73} L72,${acc.includes('bandana')?81:77} Q50,${acc.includes('bandana')?77:73} 28,${acc.includes('bandana')?81:77} Z`} fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" />
+          <g style={{ transformOrigin: `50px ${acc.includes('bandana')?81:77}px`, animation: 'bellSwing 2s ease-in-out infinite' }}>
+            <circle cx="50" cy={acc.includes('bandana')?85:81} r="4.5" fill="#fbbf24" stroke="#d97706" strokeWidth="0.8" />
+          </g>
+        </g>
+      )}
+      {/* Bow tie */}
+      {acc.includes('bow_tie') && (
+        <g transform="translate(50, 78)"><polygon points="-10,-5 0,0 -10,5" fill="#ef4444" /><polygon points="10,-5 0,0 10,5" fill="#ef4444" /><circle cx="0" cy="0" r="2.5" fill="#dc2626" /></g>
+      )}
+      {/* Front legs */}
+      <rect x="36" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+      <rect x="54" y="98" width="10" height="18" rx="5" fill={fur} stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="41" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="59" cy="116" rx="7" ry="4" fill={furLight} stroke={stroke} strokeWidth={sw} />
+      {/* Sneakers */}
+      {acc.includes('sneakers') && (
+        <g><rect x="33" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" /><rect x="51" y="112" width="16" height="8" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="1" /></g>
+      )}
+      {/* Ears */}
+      <g style={{ transformOrigin:'26px 28px', animation:earsDown?'none':'earBounce 3s ease-in-out infinite', transform:earsDown?'rotate(25deg) translateY(8px)':'rotate(0deg)' }}>
+        <ellipse cx="22" cy="20" rx="13" ry="18" transform="rotate(-15,22,20)" fill={fur} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="22" cy="20" rx="7" ry="12" transform="rotate(-15,22,20)" fill={earPink} opacity="0.5" />
+      </g>
+      <g style={{ transformOrigin:'74px 28px', animation:earsDown?'none':'earBounce 3s ease-in-out infinite 0.5s', transform:earsDown?'rotate(-25deg) translateY(8px)':'rotate(0deg)' }}>
+        <ellipse cx="78" cy="20" rx="13" ry="18" transform="rotate(15,78,20)" fill={fur} stroke={stroke} strokeWidth={sw} />
+        <ellipse cx="78" cy="20" rx="7" ry="12" transform="rotate(15,78,20)" fill={earPink} opacity="0.5" />
+      </g>
+      {/* Head */}
+      <circle cx="50" cy="42" r="32" fill={fur} stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="44" cy="30" rx="16" ry="10" fill={furLight} opacity="0.25" />
+      {/* Cheeks */}
+      {(state==='thriving'||state==='content') && (<><ellipse cx="24" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" /><ellipse cx="76" cy="48" rx="6" ry="4" fill={earPink} opacity="0.3" /></>)}
+      {/* Muzzle */}
+      <ellipse cx="50" cy="52" rx="16" ry="12" fill={furLight} stroke={stroke} strokeWidth={sw*0.6} />
+      {/* Eyes — big & glossy */}
+      <g style={{ transformOrigin:'50px 39px', animation:(state==='content'||state==='thriving')?'happyEyes 4s ease-in-out infinite':'none' }}>
+        <ellipse cx="38" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw*0.6} />
+        {state!=='sad'&&state!=='neglected'&&(<><circle cx="39.5" cy={39+(eyeRY>7?1.5:0)} r={Math.min(eyeRY*0.5,5.5)} fill={nose} /><circle cx="36.5" cy={39-eyeRY*0.28} r={Math.min(eyeRY*0.25,2.5)} fill="#fff" /><circle cx="41" cy={39+eyeRY*0.15} r="1" fill="#fff" /></>)}
+        {(state==='sad'||state==='neglected')&&<line x1="30" y1="39" x2="46" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />}
+        <ellipse cx="62" cy="39" rx="9" ry={eyeRY} fill="white" stroke={stroke} strokeWidth={sw*0.6} />
+        {state!=='sad'&&state!=='neglected'&&(<><circle cx="60.5" cy={39+(eyeRY>7?1.5:0)} r={Math.min(eyeRY*0.5,5.5)} fill={nose} /><circle cx="63.5" cy={39-eyeRY*0.28} r={Math.min(eyeRY*0.25,2.5)} fill="#fff" /><circle cx="59" cy={39+eyeRY*0.15} r="1" fill="#fff" /></>)}
+        {(state==='sad'||state==='neglected')&&<line x1="54" y1="39" x2="70" y2="39" stroke={nose} strokeWidth="2" strokeLinecap="round" />}
+      </g>
+      {/* Brows */}
+      {state==='sad'&&(<><line x1="30" y1="33" x2="42" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" /><line x1="70" y1="33" x2="58" y2="35" stroke={nose} strokeWidth="2" strokeLinecap="round" /></>)}
+      {state==='neglected'&&(<><line x1="29" y1="32" x2="43" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" /><line x1="71" y1="32" x2="57" y2="36" stroke={nose} strokeWidth="2.5" strokeLinecap="round" /></>)}
+      {/* Nose */}
+      <ellipse cx="50" cy="49" rx="5" ry="3.5" fill={nose} />
+      <ellipse cx="48.5" cy="48" rx="2" ry="1.2" fill="rgba(255,255,255,0.3)" />
+      {/* Mouth */}
+      <path d={mouthPath} fill="none" stroke={nose} strokeWidth="1.8" strokeLinecap="round" />
+      {/* Tongue */}
+      {showTongue && (
+        <g style={{ transformOrigin:'50px 58px', animation:'tongueWag 1s ease-in-out infinite' }}>
+          <ellipse cx="50" cy="60" rx="4" ry="5" fill={tongue} stroke="#e55a7a" strokeWidth="0.8" />
+          <line x1="50" y1="56" x2="50" y2="63" stroke="#e55a7a" strokeWidth="0.6" />
+        </g>
+      )}
+      {/* Tears */}
+      {showTears && (
+        <><ellipse cx="30" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation:'tearDrip 2s ease-in-out infinite' }} />
+        {state==='neglected'&&<ellipse cx="70" cy="46" rx="1.5" ry="2.5" fill="#60a5fa" opacity="0.7" style={{ animation:'tearDrip 2s ease-in-out infinite 0.8s' }} />}</>
+      )}
+      {/* Sunglasses */}
+      {acc.includes('sunglasses') && (
+        <g><rect x="28" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" /><rect x="56" y="35" width="16" height="11" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" /><line x1="44" y1="40" x2="56" y2="40" stroke="#475569" strokeWidth="1.5" /></g>
+      )}
+      {/* Ninja mask */}
+      {acc.includes('ninja_mask') && <rect x="30" y="47" width="40" height="14" rx="5" fill="#1f2937" opacity="0.85" />}
+      {/* Headband */}
+      {acc.includes('ninja_headband') && (
+        <g><rect x="18" y="28" width="64" height="7" rx="3.5" fill="#dc2626" stroke="#b91c1c" strokeWidth="0.8" /><path d="M82,29 Q92,27 97,32" stroke="#dc2626" strokeWidth="4.5" fill="none" strokeLinecap="round" /></g>
+      )}
+      {/* Crown */}
+      {acc.includes('crown') && (
+        <g transform="translate(50, 10)"><polygon points="-16,12 -12,0 -6,8 0,-6 6,8 12,0 16,12" fill="#fbbf24" stroke="#d97706" strokeWidth="1.2" /><rect x="-16" y="10" width="32" height="5" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" /><circle cx="-10" cy="2" r="2" fill="#ef4444" /><circle cx="0" cy="-4" r="2" fill="#3b82f6" /><circle cx="10" cy="2" r="2" fill="#22c55e" /></g>
+      )}
+      {/* Sword */}
+      {acc.includes('tiny_sword') && (
+        <g transform="translate(84, 55) rotate(-35)"><rect x="-2" y="-24" width="4" height="22" rx="1.5" fill="#d1d5db" stroke="#9ca3af" strokeWidth="0.8" /><polygon points="-2,-24 2,-24 0,-30" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="0.8" /><rect x="-6" y="-2" width="12" height="3.5" rx="1.5" fill="#d97706" stroke="#92400e" strokeWidth="0.8" /><rect x="-1.5" y="1.5" width="3" height="10" rx="1.5" fill="#78350f" /></g>
+      )}
+    </g>
+  );
+}
+
 // --- Puppy Home Screen ---
 function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
   const [showShop, setShowShop] = useState(false);
   const [petCount, setPetCount] = useState(0);
   const [buyAnimation, setBuyAnimation] = useState(null);
+  const [wiggle, setWiggle] = useState(false);
+  const [hearts, setHearts] = useState([]);
+  const heartIdRef = useRef(0);
 
   const handlePetPuppy = () => {
     const boosts = [5, 3, 1, 0];
@@ -1654,6 +2347,18 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
       saveState(newState);
     }
     setPetCount(prev => prev + 1);
+    // Hearts + wiggle
+    setWiggle(true);
+    setTimeout(() => setWiggle(false), 600);
+    const newHearts = Array.from({ length: 3 }, () => ({
+      id: heartIdRef.current++,
+      x: randInt(-60, 60),
+      delay: Math.random() * 0.3,
+    }));
+    setHearts(prev => [...prev, ...newHearts]);
+    setTimeout(() => {
+      setHearts(prev => prev.filter(h => !newHearts.find(nh => nh.id === h.id)));
+    }, 1500);
   };
 
   const handleBuy = (itemId) => {
@@ -1691,17 +2396,64 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
     setTimeout(() => setBuyAnimation(null), 600);
   };
 
-  const roomBg = gameState.pet.roomTheme === 'dojo'
-    ? 'linear-gradient(180deg, #1a0a00 0%, #2d1810 50%, #4a2c17 100%)'
-    : gameState.pet.roomTheme === 'painted'
-      ? 'linear-gradient(180deg, #1e3a5f 0%, #2d5a3e 50%, #4a7c59 100%)'
-      : 'linear-gradient(180deg, #2a1a0a 0%, #3d2817 50%, #5a3d2a 100%)';
+  const handleBuyRoom = (itemId, itemType) => {
+    // itemType: 'room_item', 'wall_paint', 'wallpaper', 'flooring'
+    let cost = 0;
+    let happyBoost = 0;
+
+    if (itemType === 'wall_paint') {
+      cost = WALL_PAINTS[itemId]?.cost || 0;
+    } else if (itemType === 'wallpaper') {
+      cost = WALLPAPERS[itemId]?.cost || 0;
+    } else if (itemType === 'flooring') {
+      cost = FLOOR_OPTIONS[itemId]?.cost || 0;
+    } else {
+      cost = ROOM_ITEMS[itemId]?.cost || 0;
+      happyBoost = ROOM_ITEMS[itemId]?.happinessBoost || 0;
+    }
+
+    if (gameState.coins < cost) return;
+
+    let newState = { ...gameState, coins: gameState.coins - cost };
+    let roomUpdate = { ...newState.room };
+    let petUpdate = { ...newState.pet };
+
+    if (itemType === 'wall_paint') {
+      roomUpdate.wallPaint = itemId;
+    } else if (itemType === 'wallpaper') {
+      roomUpdate.wallpaper = itemId;
+    } else if (itemType === 'flooring') {
+      roomUpdate.flooring = itemId;
+    } else {
+      // Room item — add to list, handle replacements
+      const replacements = ROOM_ITEMS[itemId]?.replaces;
+      let items = [...(roomUpdate.purchasedItems || [])];
+      if (replacements && items.includes(replacements)) {
+        items = items.filter(i => i !== replacements);
+      }
+      items.push(itemId);
+      roomUpdate.purchasedItems = items;
+    }
+
+    if (happyBoost > 0) {
+      petUpdate.happiness = Math.min(100, petUpdate.happiness + happyBoost);
+    }
+
+    newState.room = roomUpdate;
+    newState.pet = petUpdate;
+    setGameState(newState);
+    saveState(newState);
+
+    setBuyAnimation(itemId);
+    setTimeout(() => setBuyAnimation(null), 600);
+  };
 
   if (showShop) {
     return (
       <ShopScreen
         gameState={gameState}
         onBuy={handleBuy}
+        onBuyRoom={handleBuyRoom}
         onBack={() => setShowShop(false)}
         buyAnimation={buyAnimation}
       />
@@ -1734,45 +2486,32 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
         </div>
 
         {/* Meters */}
-        <div style={{ width: '100%', maxWidth: '400px', margin: '10px 0' }}>
+        <div style={{ width: '100%', maxWidth: '420px', margin: '10px 0' }}>
           <MeterBar label="🍖" value={gameState.pet.hunger} color="#ef4444" />
           <MeterBar label="💧" value={gameState.pet.thirst} color="#3b82f6" />
           <MeterBar label="😊" value={gameState.pet.happiness} color="#eab308" />
         </div>
 
-        {/* Puppy Room */}
-        <div style={{
-          width: '100%',
-          maxWidth: '400px',
-          background: roomBg,
-          borderRadius: '20px',
-          border: '3px solid rgba(139, 92, 42, 0.5)',
-          padding: '30px 20px',
-          margin: '10px 0',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          minHeight: '280px',
-          justifyContent: 'center',
-          position: 'relative',
+        {/* Puppy Room (SVG Scene) */}
+        <div onClick={handlePetPuppy} style={{
+          cursor: 'pointer', width: '100%', maxWidth: '420px', margin: '10px 0', position: 'relative',
+          animation: wiggle ? 'wiggle 0.6s' : 'none',
         }}>
-          {/* Room decorations */}
-          {gameState.pet.roomTheme === 'dojo' && (
-            <div style={{ position: 'absolute', top: '10px', right: '15px', fontSize: '32px', opacity: 0.5 }}>⛩️</div>
-          )}
-
-          <Puppy pet={gameState.pet} size={110} onPet={handlePetPuppy} />
-
-          {/* Items in room */}
-          <div style={{ display: 'flex', gap: '16px', marginTop: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {gameState.pet.purchasedItems.includes('food_bowl') && <span style={{ fontSize: '28px' }}>🥣</span>}
-            {gameState.pet.purchasedItems.includes('water_bowl') && <span style={{ fontSize: '28px' }}>🥤</span>}
-            {gameState.pet.purchasedItems.includes('bed') && <span style={{ fontSize: '28px' }}>🛏️</span>}
-            {gameState.pet.purchasedItems.includes('toy_ball') && <span style={{ fontSize: '28px' }}>⚾</span>}
-            {gameState.pet.purchasedItems.includes('chew_rope') && <span style={{ fontSize: '28px' }}>🪢</span>}
-          </div>
-
-          <div style={{ fontSize: '13px', opacity: 0.5, marginTop: '12px' }}>
+          {/* Floating hearts */}
+          {hearts.map(h => (
+            <div key={h.id} style={{
+              position: 'absolute',
+              top: '30%',
+              left: `calc(50% + ${h.x}px)`,
+              fontSize: '24px',
+              animation: `floatUp 1.2s ease-out ${h.delay}s forwards`,
+              opacity: 0,
+              pointerEvents: 'none',
+              zIndex: 20,
+            }}>❤️</div>
+          ))}
+          <PuppyRoom room={gameState.room} pet={gameState.pet} onPet={handlePetPuppy} />
+          <div style={{ textAlign: 'center', fontSize: '13px', opacity: 0.5, marginTop: '4px' }}>
             Tap me! 👆
           </div>
         </div>
@@ -1792,17 +2531,20 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
 }
 
 // --- Shop Screen ---
-function ShopScreen({ gameState, onBuy, onBack, buyAnimation }) {
+function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
   const [tab, setTab] = useState('consumables');
   const purchased = gameState.pet.purchasedItems;
+  const roomPurchased = gameState.room?.purchasedItems || [];
 
   const tabs = [
     { id: 'consumables', label: '🍖 Food' },
     { id: 'necessities', label: '🏠 Stuff' },
-    { id: 'accessories', label: '✨ Cool Stuff' },
+    { id: 'accessories', label: '✨ Outfit' },
+    { id: 'room', label: '🪑 Room' },
   ];
 
-  const getItems = () => {
+  // For pet shop items
+  const getPetItems = () => {
     return Object.entries(SHOP_ITEMS).filter(([_, item]) => {
       if (tab === 'consumables') return item.category === 'consumables';
       if (tab === 'necessities') return item.category === 'necessities' || item.category === 'upgrades';
@@ -1824,6 +2566,98 @@ function ShopScreen({ gameState, onBuy, onBack, buyAnimation }) {
     if (gameState.coins < item.cost) return 'cantAfford';
     return 'available';
   };
+
+  // Room shop tab sub-section
+  const [roomTab, setRoomTab] = useState('furniture');
+  const roomTabs = [
+    { id: 'furniture', label: '🪑' },
+    { id: 'wall_decor', label: '🖼️' },
+    { id: 'electronics', label: '📺' },
+    { id: 'premium', label: '⭐' },
+    { id: 'paint', label: '🎨' },
+  ];
+
+  const getRoomItems = () => {
+    if (roomTab === 'paint') {
+      // Combine wall paints, wallpapers, flooring
+      const paintItems = Object.entries(WALL_PAINTS).map(([id, item]) => ({ id, ...item, type: 'wall_paint', isActive: gameState.room?.wallPaint === id }));
+      const wpItems = Object.entries(WALLPAPERS).map(([id, item]) => ({ id, ...item, type: 'wallpaper', isActive: gameState.room?.wallpaper === id }));
+      const floorItems = Object.entries(FLOOR_OPTIONS).map(([id, item]) => ({ id, ...item, type: 'flooring', isActive: gameState.room?.flooring === id }));
+      return [...paintItems, ...wpItems, ...floorItems];
+    }
+    return Object.entries(ROOM_ITEMS).filter(([_, item]) => item.category === roomTab).map(([id, item]) => ({ id, ...item, type: 'room_item' }));
+  };
+
+  const isRoomItemPurchased = (item) => {
+    if (item.type === 'wall_paint') return false; // Can always switch paint
+    if (item.type === 'wallpaper') return false;
+    if (item.type === 'flooring') return false;
+    return roomPurchased.includes(item.id);
+  };
+
+  const canBuyRoomItem = (item) => {
+    if (gameState.coins < item.cost) return false;
+    if (item.type === 'wall_paint' && gameState.room?.wallPaint === item.id) return false; // Already active
+    if (item.type === 'wallpaper' && gameState.room?.wallpaper === item.id) return false;
+    if (item.type === 'flooring' && gameState.room?.flooring === item.id) return false;
+    if (item.type === 'room_item') {
+      if (roomPurchased.includes(item.id)) return false;
+      if (item.requires && !roomPurchased.includes(item.requires)) return false;
+    }
+    return true;
+  };
+
+  const getRoomItemStatus = (item) => {
+    if (item.type === 'room_item' && roomPurchased.includes(item.id)) return 'purchased';
+    if (item.isActive) return 'active';
+    if (item.requires && !roomPurchased.includes(item.requires)) return 'locked';
+    if (gameState.coins < item.cost) return 'cantAfford';
+    return 'available';
+  };
+
+  const shopItemRow = (icon, name, effectText, status, isBuying, cost, onBuyFn) => (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      background: isBuying ? 'rgba(34,197,94,0.3)' : (status === 'purchased' || status === 'active') ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.06)',
+      borderRadius: '14px',
+      padding: '12px 16px',
+      border: (status === 'purchased' || status === 'active') ? '2px solid rgba(34,197,94,0.3)' : '2px solid rgba(255,255,255,0.08)',
+      opacity: status === 'cantAfford' || status === 'locked' ? 0.5 : 1,
+      transition: 'all 0.3s',
+    }}>
+      <span style={{ fontSize: '28px' }}>{status === 'locked' ? '🔒' : icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 700, fontSize: '15px' }}>{name}</div>
+        <div style={{ fontSize: '12px', opacity: 0.7 }}>{effectText}</div>
+      </div>
+      {status === 'purchased' ? (
+        <span style={{ color: '#22c55e', fontWeight: 700, fontSize: '18px' }}>✅</span>
+      ) : status === 'active' ? (
+        <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '12px' }}>Active</span>
+      ) : (
+        <button
+          onClick={onBuyFn}
+          disabled={status !== 'available'}
+          style={{
+            padding: '8px 14px',
+            background: status === 'available' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'rgba(100,100,100,0.3)',
+            border: 'none',
+            borderRadius: '10px',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: status === 'available' ? 'pointer' : 'default',
+            fontFamily: 'inherit',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          🪙 {cost}
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div style={styles.app}>
@@ -1851,20 +2685,20 @@ function ShopScreen({ gameState, onBuy, onBack, buyAnimation }) {
           <CoinDisplay coins={gameState.coins} />
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '6px', margin: '10px 0', width: '100%', maxWidth: '500px' }}>
+        {/* Main Tabs */}
+        <div style={{ display: 'flex', gap: '5px', margin: '10px 0', width: '100%', maxWidth: '500px' }}>
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
                 flex: 1,
-                padding: '10px 8px',
+                padding: '10px 6px',
                 background: tab === t.id ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.05)',
                 border: tab === t.id ? '2px solid #f59e0b' : '2px solid rgba(255,255,255,0.1)',
                 borderRadius: '12px',
                 color: '#fff',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -1873,55 +2707,75 @@ function ShopScreen({ gameState, onBuy, onBack, buyAnimation }) {
           ))}
         </div>
 
+        {/* Room sub-tabs */}
+        {tab === 'room' && (
+          <div style={{ display: 'flex', gap: '4px', margin: '0 0 10px', width: '100%', maxWidth: '500px' }}>
+            {roomTabs.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setRoomTab(t.id)}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  background: roomTab === t.id ? 'rgba(168,85,247,0.3)' : 'rgba(255,255,255,0.03)',
+                  border: roomTab === t.id ? '2px solid #a855f7' : '2px solid rgba(255,255,255,0.06)',
+                  borderRadius: '10px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >{t.label}</button>
+            ))}
+          </div>
+        )}
+
         {/* Items */}
-        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '20px' }}>
-          {getItems().map(([itemId, item]) => {
-            const status = getStatus(itemId, item);
-            const isBuying = buyAnimation === itemId;
-            return (
-              <div key={itemId} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                background: isBuying ? 'rgba(34,197,94,0.3)' : status === 'purchased' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.06)',
-                borderRadius: '14px',
-                padding: '12px 16px',
-                border: status === 'purchased' ? '2px solid rgba(34,197,94,0.3)' : '2px solid rgba(255,255,255,0.08)',
-                opacity: status === 'cantAfford' || status === 'locked' ? 0.5 : 1,
-                transition: 'all 0.3s',
-              }}>
-                <span style={{ fontSize: '32px' }}>{status === 'locked' ? '🔒' : item.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: '15px' }}>{item.name}</div>
-                  <div style={{ fontSize: '12px', opacity: 0.7 }}>
-                    {status === 'locked' ? `Need ${SHOP_ITEMS[item.requires]?.icon} ${SHOP_ITEMS[item.requires]?.name} first!` : item.effect}
-                  </div>
+        <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '8px', paddingBottom: '20px', overflowY: 'auto', maxHeight: '55vh' }}>
+          {tab !== 'room' ? (
+            // Pet shop items
+            getPetItems().map(([itemId, item]) => {
+              const status = getStatus(itemId, item);
+              const isBuying = buyAnimation === itemId;
+              return (
+                <div key={itemId}>
+                  {shopItemRow(
+                    item.icon,
+                    item.name,
+                    status === 'locked' ? `Need ${SHOP_ITEMS[item.requires]?.icon} ${SHOP_ITEMS[item.requires]?.name} first!` : item.effect,
+                    status,
+                    isBuying,
+                    item.cost,
+                    () => canBuy(itemId, item) && onBuy(itemId)
+                  )}
                 </div>
-                {status === 'purchased' ? (
-                  <span style={{ color: '#22c55e', fontWeight: 700, fontSize: '20px' }}>✅</span>
-                ) : (
-                  <button
-                    onClick={() => canBuy(itemId, item) && onBuy(itemId)}
-                    disabled={!canBuy(itemId, item)}
-                    style={{
-                      padding: '8px 16px',
-                      background: canBuy(itemId, item) ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'rgba(100,100,100,0.3)',
-                      border: 'none',
-                      borderRadius: '10px',
-                      color: '#fff',
-                      fontWeight: 700,
-                      fontSize: '14px',
-                      cursor: canBuy(itemId, item) ? 'pointer' : 'default',
-                      fontFamily: 'inherit',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    🪙 {item.cost}
-                  </button>
-                )}
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            // Room shop items
+            getRoomItems().map((item) => {
+              const status = getRoomItemStatus(item);
+              const isBuying = buyAnimation === item.id;
+              const effectText = item.type === 'room_item'
+                ? `+${item.happinessBoost}% 😊${item.requires ? ` (Need ${ROOM_ITEMS[item.requires]?.icon || ''})` : ''}`
+                : item.type === 'wall_paint' ? '🎨 Wall color'
+                : item.type === 'wallpaper' ? '🧱 Wall pattern'
+                : '🏠 Floor style';
+              return (
+                <div key={item.id}>
+                  {shopItemRow(
+                    item.icon,
+                    item.name,
+                    status === 'locked' ? `Need ${ROOM_ITEMS[item.requires]?.icon} first!` : effectText,
+                    status,
+                    isBuying,
+                    item.cost,
+                    () => canBuyRoomItem(item) && onBuyRoom(item.id, item.type)
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
@@ -2051,6 +2905,16 @@ const globalCSS = `
   @keyframes capeFlutter {
     0%, 100% { transform: skewX(0deg); }
     50% { transform: skewX(3deg); }
+  }
+
+  @keyframes fairyPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes lavaFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
   }
 
   button:active {
