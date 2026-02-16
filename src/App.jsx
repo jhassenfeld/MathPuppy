@@ -36,7 +36,7 @@ const MODES = {
 };
 
 const PROBLEMS_PER_WAVE = 9;
-const FALL_DURATION = 10000;
+const BOUNCE_SPEED = 0.02;
 const PERFECT_TIME = 2000;
 const PAUSE_BETWEEN = 500;
 
@@ -665,9 +665,10 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
   const [problemIndex, setProblemIndex] = useState(0);
   const [problem, setProblem] = useState(() => fixProblem(generateProblem(mode, wave)));
   const [fruit, setFruit] = useState(randomFruit);
-  const [fruitY, setFruitY] = useState(0);
-  const [fruitX] = useState(() => randInt(-40, 40));
+  const [fruitPos, setFruitPos] = useState({ x: 50, y: 20 });
   const [fruitRotation, setFruitRotation] = useState(0);
+  const fruitPosRef = useRef({ x: 50, y: 20 });
+  const fruitVelRef = useRef(null);
   const [numpadValue, setNumpadValue] = useState('');
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -680,9 +681,7 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
   const [gridFlashRed, setGridFlashRed] = useState(null);
   const [numpadFlash, setNumpadFlash] = useState(null);
   const [sliceActive, setSliceActive] = useState(false);
-  const [sliceY, setSliceY] = useState(0);
-  const [splatActive, setSplatActive] = useState(false);
-  const [showAnswer, setShowAnswer] = useState(null);
+  const [slicePos, setSlicePos] = useState({ x: 50, y: 50 });
   const [isPerfect, setIsPerfect] = useState(false);
   const [paused, setPaused] = useState(false);
   const [particles, setParticles] = useState([]);
@@ -698,24 +697,51 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
 
   useEffect(() => { streakRef.current = streak; }, [streak]);
 
-  // Fruit falling animation
+  // Fruit bouncing animation (DVD screensaver style)
   useEffect(() => {
     if (paused) return;
-    const startTime = Date.now();
-    startTimeRef.current = startTime;
+    startTimeRef.current = Date.now();
     problemActiveRef.current = true;
 
+    // Initialize velocity on new problem
+    if (!fruitVelRef.current) {
+      const angle = Math.random() * Math.PI * 2;
+      fruitVelRef.current = {
+        vx: Math.cos(angle) * BOUNCE_SPEED,
+        vy: Math.sin(angle) * BOUNCE_SPEED,
+      };
+      const startPos = { x: 20 + Math.random() * 60, y: 15 + Math.random() * 25 };
+      fruitPosRef.current = startPos;
+      setFruitPos(startPos);
+    }
+
+    let lastTime = Date.now();
     const animate = () => {
       if (!problemActiveRef.current) return;
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / FALL_DURATION, 1);
-      setFruitY(progress * 100);
-      setFruitRotation(progress * 180);
+      const now = Date.now();
+      const dt = now - lastTime;
+      lastTime = now;
 
-      if (progress >= 1) {
-        handleTimeout();
-        return;
+      const pos = fruitPosRef.current;
+      const vel = fruitVelRef.current;
+      let nx = pos.x + vel.vx * dt;
+      let ny = pos.y + vel.vy * dt;
+
+      // Bounce off walls (10% margin on sides, 5% top, 15% bottom)
+      if (nx < 10 || nx > 90) {
+        vel.vx *= -1;
+        nx = nx < 10 ? 10 : 90;
       }
+      if (ny < 5 || ny > 85) {
+        vel.vy *= -1;
+        ny = ny < 5 ? 5 : 85;
+      }
+
+      const newPos = { x: nx, y: ny };
+      fruitPosRef.current = newPos;
+      setFruitPos(newPos);
+      setFruitRotation(prev => prev + dt * 0.05);
+
       animFrameRef.current = requestAnimationFrame(animate);
     };
     animFrameRef.current = requestAnimationFrame(animate);
@@ -725,16 +751,16 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
     };
   }, [problemIndex, paused]);
 
-  const spawnParticles = (y, color, count = 10) => {
+  const spawnParticles = (pos, color, count = 10) => {
     const area = playAreaRef.current;
     if (!area) return;
-    const centerX = area.offsetWidth / 2;
+    const centerX = (pos.x / 100) * area.offsetWidth;
     const newParticles = Array.from({ length: count }, () => {
       const id = particleIdRef.current++;
       return {
         id,
         x: centerX + randInt(-30, 30),
-        y: (y / 100) * (area.offsetHeight - 60) + 30,
+        y: (pos.y / 100) * (area.offsetHeight - 60) + 30,
         vx: (Math.random() - 0.5) * 8,
         vy: (Math.random() - 0.5) * 8 - 3,
         size: randInt(6, 14),
@@ -768,10 +794,10 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
 
     const perfect = answerTime < PERFECT_TIME;
-    const currentSliceY = fruitY;
+    const currentPos = { ...fruitPosRef.current };
 
     setSliceActive(true);
-    setSliceY(currentSliceY);
+    setSlicePos(currentPos);
     setIsPerfect(perfect);
 
     const earnedCoins = 5 + (perfect ? 5 : 0);
@@ -790,7 +816,7 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
     setCoinFlash(true);
     setTimeout(() => setCoinFlash(false), 300);
 
-    spawnParticles(currentSliceY, fruit.color, perfect ? 20 : 10);
+    spawnParticles(currentPos, fruit.color, perfect ? 20 : 10);
 
     setTimeout(() => {
       setSliceActive(false);
@@ -803,24 +829,6 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
     streakRef.current = 0;
   };
 
-  const handleTimeout = () => {
-    if (!problemActiveRef.current) return;
-    problemActiveRef.current = false;
-
-    setSplatActive(true);
-    setShowAnswer(problem.correctAnswer);
-    setStreak(0);
-    streakRef.current = 0;
-
-    spawnParticles(100, fruit.color, 8);
-
-    setTimeout(() => {
-      setSplatActive(false);
-      setShowAnswer(null);
-      nextProblem();
-    }, 2000);
-  };
-
   const nextProblem = () => {
     const next = problemIndex + 1;
     if (next >= PROBLEMS_PER_WAVE) {
@@ -830,7 +838,9 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
     setProblemIndex(next);
     setProblem(fixProblem(generateProblem(mode, wave)));
     setFruit(randomFruit());
-    setFruitY(0);
+    setFruitPos({ x: 50, y: 20 });
+    fruitPosRef.current = { x: 50, y: 20 };
+    fruitVelRef.current = null;
     setNumpadValue('');
     setDisabledNums([]);
     setGridFlashGreen(null);
@@ -1036,136 +1046,79 @@ function GameplayScreen({ mode, wave, gameState, setGameState, onWaveComplete, o
               </div>
             )}
 
-            {/* Show correct answer on timeout */}
-            {showAnswer !== null && (
+            {/* Bouncing Fruit */}
+            {!sliceActive && (
               <div style={{
                 position: 'absolute',
-                bottom: '60px',
-                left: modeConfig.inputType === 'numpad' ? '35%' : '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(0,0,0,0.7)',
-                padding: '10px 24px',
-                borderRadius: '12px',
-                fontSize: '22px',
-                fontWeight: 700,
-                color: '#fef3c7',
-                zIndex: 20,
-              }}>
-                It was {showAnswer}!
-              </div>
-            )}
-
-            {/* Falling Fruit — offset left in numpad mode so it doesn't overlap */}
-            {!sliceActive && !splatActive && (
-              <div style={{
-                position: 'absolute',
-                top: `${fruitY}%`,
-                left: modeConfig.inputType === 'numpad'
-                  ? `calc(40% + ${fruitX}px)`
-                  : `calc(50% + ${fruitX}px)`,
+                top: `${fruitPos.y}%`,
+                left: `${fruitPos.x}%`,
                 transform: `translate(-50%, -50%) rotate(${fruitRotation}deg)`,
                 fontSize: '56px',
                 transition: 'none',
                 zIndex: 5,
-                filter: `drop-shadow(0 ${4 + fruitY * 0.2}px ${8 + fruitY * 0.3}px rgba(0,0,0,${0.2 + fruitY * 0.003}))`,
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
               }}>
                 {fruit.emoji}
               </div>
             )}
 
             {/* Slice Effect */}
-            {sliceActive && (() => {
-              const fruitCenter = modeConfig.inputType === 'numpad'
-                ? `calc(40% + ${fruitX}px)`
-                : `calc(50% + ${fruitX}px)`;
-              return (
-                <>
-                  {/* Slash line */}
+            {sliceActive && (
+              <>
+                {/* Slash line */}
+                <div style={{
+                  position: 'absolute',
+                  top: `${slicePos.y}%`,
+                  left: `${Math.max(0, slicePos.x - 30)}%`,
+                  width: '60%',
+                  height: '4px',
+                  background: isPerfect
+                    ? 'linear-gradient(90deg, transparent, #f59e0b, #fff, #f59e0b, transparent)'
+                    : 'linear-gradient(90deg, transparent, #fff, transparent)',
+                  transform: 'rotate(-15deg)',
+                  animation: 'slashIn 0.2s ease-out',
+                  zIndex: 15,
+                  boxShadow: isPerfect ? '0 0 20px rgba(245,158,11,0.8)' : '0 0 10px rgba(255,255,255,0.5)',
+                }} />
+                {/* Split halves */}
+                <div style={{
+                  position: 'absolute',
+                  top: `${slicePos.y}%`,
+                  left: `calc(${slicePos.x}% - 20px)`,
+                  fontSize: '56px',
+                  animation: isPerfect ? 'splitLeftSpin 0.6s ease-out forwards' : 'splitLeft 0.6s ease-out forwards',
+                  zIndex: 6,
+                  opacity: 0.8,
+                  clipPath: 'inset(0 50% 0 0)',
+                }}>
+                  {fruit.emoji}
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  top: `${slicePos.y}%`,
+                  left: `calc(${slicePos.x}% + 20px)`,
+                  fontSize: '56px',
+                  animation: isPerfect ? 'splitRightSpin 0.6s ease-out forwards' : 'splitRight 0.6s ease-out forwards',
+                  zIndex: 6,
+                  opacity: 0.8,
+                  clipPath: 'inset(0 0 0 50%)',
+                }}>
+                  {fruit.emoji}
+                </div>
+                {/* Screen flash for perfect */}
+                {isPerfect && (
                   <div style={{
                     position: 'absolute',
-                    top: `${sliceY}%`,
-                    left: '10%',
-                    width: '60%',
-                    height: '4px',
-                    background: isPerfect
-                      ? 'linear-gradient(90deg, transparent, #f59e0b, #fff, #f59e0b, transparent)'
-                      : 'linear-gradient(90deg, transparent, #fff, transparent)',
-                    transform: 'rotate(-15deg)',
-                    animation: 'slashIn 0.2s ease-out',
-                    zIndex: 15,
-                    boxShadow: isPerfect ? '0 0 20px rgba(245,158,11,0.8)' : '0 0 10px rgba(255,255,255,0.5)',
+                    inset: 0,
+                    background: 'rgba(255,255,255,0.15)',
+                    animation: 'flashFade 0.4s ease-out forwards',
+                    zIndex: 14,
+                    pointerEvents: 'none',
                   }} />
-                  {/* Split halves */}
-                  <div style={{
-                    position: 'absolute',
-                    top: `${sliceY}%`,
-                    left: `calc(${fruitCenter} - 20px)`,
-                    fontSize: '56px',
-                    animation: isPerfect ? 'splitLeftSpin 0.6s ease-out forwards' : 'splitLeft 0.6s ease-out forwards',
-                    zIndex: 6,
-                    opacity: 0.8,
-                    clipPath: 'inset(0 50% 0 0)',
-                  }}>
-                    {fruit.emoji}
-                  </div>
-                  <div style={{
-                    position: 'absolute',
-                    top: `${sliceY}%`,
-                    left: `calc(${fruitCenter} + 20px)`,
-                    fontSize: '56px',
-                    animation: isPerfect ? 'splitRightSpin 0.6s ease-out forwards' : 'splitRight 0.6s ease-out forwards',
-                    zIndex: 6,
-                    opacity: 0.8,
-                    clipPath: 'inset(0 0 0 50%)',
-                  }}>
-                    {fruit.emoji}
-                  </div>
-                  {/* Screen flash for perfect */}
-                  {isPerfect && (
-                    <div style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'rgba(255,255,255,0.15)',
-                      animation: 'flashFade 0.4s ease-out forwards',
-                      zIndex: 14,
-                      pointerEvents: 'none',
-                    }} />
-                  )}
-                </>
-              );
-            })()}
-
-            {/* Splat Effect */}
-            {splatActive && (
-              <div style={{
-                position: 'absolute',
-                bottom: '10px',
-                left: modeConfig.inputType === 'numpad'
-                  ? `calc(40% + ${fruitX}px)`
-                  : `calc(50% + ${fruitX}px)`,
-                transform: 'translateX(-50%) scaleY(0.3) scaleX(1.5)',
-                fontSize: '56px',
-                opacity: 0.7,
-                zIndex: 5,
-              }}>
-                {fruit.emoji}
-              </div>
+                )}
+              </>
             )}
 
-            {/* Ground shadow */}
-            <div style={{
-              position: 'absolute',
-              bottom: '5px',
-              left: modeConfig.inputType === 'numpad'
-                ? `calc(40% + ${fruitX}px)`
-                : `calc(50% + ${fruitX}px)`,
-              transform: 'translateX(-50%)',
-              width: `${20 + fruitY * 0.4}px`,
-              height: '8px',
-              borderRadius: '50%',
-              background: `rgba(0,0,0,${0.1 + fruitY * 0.003})`,
-              transition: 'none',
-            }} />
           </div>
 
           {/* Input Area */}
