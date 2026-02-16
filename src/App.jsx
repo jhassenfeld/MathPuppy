@@ -1974,7 +1974,7 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
         {/* Puppy Room (SVG Scene) */}
         <div onClick={handlePetPuppy} style={{
           cursor: 'pointer', width: '100%', maxWidth: '420px', margin: '10px 0', position: 'relative',
-          animation: wiggle ? 'wiggle 0.6s' : 'none',
+          animation: 'none',
         }}>
           {/* Floating hearts */}
           {hearts.map(h => (
