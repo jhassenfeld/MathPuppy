@@ -51,17 +51,17 @@ const FRUITS = [
 
 const SHOP_ITEMS = {
   // Necessities
-  food_bowl: { name: 'Food Bowl', cost: 50, category: 'necessities', effect: 'Feed your puppy!', icon: '🥣', oneTime: true },
-  water_bowl: { name: 'Water Bowl', cost: 50, category: 'necessities', effect: 'Give your puppy water!', icon: '🥤', oneTime: true },
-  bed: { name: 'Bed', cost: 80, category: 'necessities', effect: 'Puppy stays happy longer!', icon: '🛏️', oneTime: true },
+  food_bowl: { name: 'Food Bowl', cost: 50, category: 'necessities', effect: 'Feed your puppy!', icon: '🥣', img: '/assets/food-bowl.png', oneTime: true },
+  water_bowl: { name: 'Water Bowl', cost: 50, category: 'necessities', effect: 'Give your puppy water!', icon: '🥤', img: '/assets/water-bowl.png', oneTime: true },
+  bed: { name: 'Bed', cost: 80, category: 'necessities', effect: 'Puppy stays happy longer!', icon: '🛏️', img: '/assets/bed.png', oneTime: true },
 
   // Upgrades
   premium_food_bowl: { name: 'Fancy Food Bowl', cost: 150, category: 'upgrades', effect: 'Better food for puppy!', icon: '🍽️', oneTime: true, requires: 'food_bowl' },
   premium_water_bowl: { name: 'Fancy Water Bowl', cost: 150, category: 'upgrades', effect: 'Better water for puppy!', icon: '🏺', oneTime: true, requires: 'water_bowl' },
   cozy_bed: { name: 'Cozy Bed', cost: 200, category: 'upgrades', effect: 'Super comfy! 🐶😴', icon: '🛋️', oneTime: true, requires: 'bed' },
-  treat_bag: { name: 'Treat Bag', cost: 120, category: 'upgrades', effect: 'Give treats! 🦴', icon: '🎒', oneTime: true },
-  toy_ball: { name: 'Toy Ball', cost: 100, category: 'upgrades', effect: 'Puppy loves to play! 😊', icon: '⚾', oneTime: true },
-  chew_rope: { name: 'Chew Rope', cost: 100, category: 'upgrades', effect: 'More fun for puppy! 😊', icon: '🪢', oneTime: true },
+  treat_bag: { name: 'Treat Bag', cost: 120, category: 'upgrades', effect: 'Give treats! 🦴', icon: '🎒', img: '/assets/treat-bag.png', oneTime: true },
+  toy_ball: { name: 'Toy Ball', cost: 100, category: 'upgrades', effect: 'Puppy loves to play! 😊', icon: '⚾', img: '/assets/toy-ball.png', oneTime: true },
+  chew_rope: { name: 'Chew Rope', cost: 100, category: 'upgrades', effect: 'More fun for puppy! 😊', icon: '🪢', img: '/assets/chew-rope.png', oneTime: true },
 
   // Consumables
   basic_kibble: { name: 'Kibble', cost: 20, category: 'consumables', effect: '🍖 → 🐶😋', icon: '🍖', oneTime: false, requires: 'food_bowl', stat: 'hunger', amount: 30 },
@@ -72,7 +72,7 @@ const SHOP_ITEMS = {
 
   // Room Themes
   painted_house: { name: 'Pretty House', cost: 400, category: 'upgrades', effect: 'New room! 🏠', icon: '🏠', oneTime: true, happinessBoost: 15, roomTheme: 'painted' },
-  ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'upgrades', effect: 'Ninja home! ⛩️', icon: '⛩️', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
+  ninja_dojo: { name: 'Ninja Dojo', cost: 800, category: 'upgrades', effect: 'Ninja home! ⛩️', icon: '⛩️', img: '/assets/ninja-dojo.png', oneTime: true, happinessBoost: 25, roomTheme: 'dojo' },
 };
 
 // ============================================================================
@@ -102,42 +102,42 @@ const FLOOR_OPTIONS = {
 
 const ROOM_ITEMS = {
   // --- Furniture (FLOOR zones) ---
-  small_rug: { name: 'Small Rug', cost: 60, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 3, icon: '🟫', replaces: null },
-  large_rug: { name: 'Large Rug', cost: 120, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 6, icon: '🟥', replaces: 'small_rug' },
-  bean_bag: { name: 'Bean Bag', cost: 100, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 5, icon: '🫘' },
-  armchair: { name: 'Armchair', cost: 180, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 8, icon: '🪑', replaces: 'bean_bag' },
+  small_rug: { name: 'Small Rug', cost: 60, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 3, icon: '🟫', img: '/assets/small-rug.png', replaces: null },
+  large_rug: { name: 'Large Rug', cost: 120, category: 'furniture', zone: 'FLOOR-C', happinessBoost: 6, icon: '🟥', img: '/assets/large-rug.png', replaces: 'small_rug' },
+  bean_bag: { name: 'Bean Bag', cost: 100, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 5, icon: '🫘', img: '/assets/bean-bag.png' },
+  armchair: { name: 'Armchair', cost: 180, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 8, icon: '🪑', img: '/assets/armchair.png', replaces: 'bean_bag' },
   couch: { name: 'Couch', cost: 300, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 12, icon: '🛋️', replaces: 'armchair' },
-  bookshelf: { name: 'Bookshelf', cost: 150, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 7, icon: '📚' },
-  side_table: { name: 'Side Table', cost: 80, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 4, icon: '🪑' },
-  lamp: { name: 'Lamp', cost: 100, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 5, icon: '💡', requires: 'side_table' },
-  toy_basket: { name: 'Toy Basket', cost: 80, category: 'furniture', zone: 'FRONT-R', happinessBoost: 4, icon: '🧺' },
+  bookshelf: { name: 'Bookshelf', cost: 150, category: 'furniture', zone: 'FLOOR-L', happinessBoost: 7, icon: '📚', img: '/assets/bookshelf.png' },
+  side_table: { name: 'Side Table', cost: 80, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 4, icon: '🪑', img: '/assets/side-table.png' },
+  lamp: { name: 'Lamp', cost: 100, category: 'furniture', zone: 'FLOOR-R', happinessBoost: 5, icon: '💡', img: '/assets/lamp.png', requires: 'side_table' },
+  toy_basket: { name: 'Toy Basket', cost: 80, category: 'furniture', zone: 'FRONT-R', happinessBoost: 4, icon: '🧺', img: '/assets/toy-basket.png' },
 
   // --- Wall Decor ---
-  paw_poster: { name: 'Paw Poster', cost: 60, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 3, icon: '🐾' },
-  space_poster: { name: 'Space Poster', cost: 80, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '🚀' },
-  ninja_poster: { name: 'Ninja Poster', cost: 100, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 5, icon: '🥋' },
+  paw_poster: { name: 'Paw Poster', cost: 60, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 3, icon: '🐾', img: '/assets/paw-poster.png' },
+  space_poster: { name: 'Space Poster', cost: 80, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '🚀', img: '/assets/space-poster.png' },
+  ninja_poster: { name: 'Ninja Poster', cost: 100, category: 'wall_decor', zone: 'WALL-L', happinessBoost: 5, icon: '🥋', img: '/assets/ninja-poster.png' },
   clock: { name: 'Clock', cost: 70, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 3, icon: '🕐' },
-  small_shelf: { name: 'Wall Shelf', cost: 90, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '📦' },
-  picture_frame: { name: 'Picture Frame', cost: 60, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 3, icon: '🖼️' },
-  fairy_lights: { name: 'Fairy Lights', cost: 120, category: 'wall_decor', zone: 'CEILING', happinessBoost: 6, icon: '✨' },
-  hanging_plant: { name: 'Hanging Plant', cost: 80, category: 'wall_decor', zone: 'CEILING', happinessBoost: 4, icon: '🪴' },
+  small_shelf: { name: 'Wall Shelf', cost: 90, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 4, icon: '📦', img: '/assets/small-shelf.png' },
+  picture_frame: { name: 'Picture Frame', cost: 60, category: 'wall_decor', zone: 'WALL-R', happinessBoost: 3, icon: '🖼️', img: '/assets/picture-frame.png' },
+  fairy_lights: { name: 'Fairy Lights', cost: 120, category: 'wall_decor', zone: 'CEILING', happinessBoost: 6, icon: '✨', img: '/assets/fairy-lights.png' },
+  hanging_plant: { name: 'Hanging Plant', cost: 80, category: 'wall_decor', zone: 'CEILING', happinessBoost: 4, icon: '🪴', img: '/assets/hanging-plant.png' },
   banner: { name: 'Banner', cost: 70, category: 'wall_decor', zone: 'CEILING', happinessBoost: 3, icon: '🎏' },
 
   // --- Electronics & Fun ---
-  radio: { name: 'Radio', cost: 100, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 5, icon: '📻' },
-  tv: { name: 'TV', cost: 250, category: 'electronics', zone: 'WALL-C', happinessBoost: 10, icon: '📺' },
-  gaming_console: { name: 'Gaming Console', cost: 200, category: 'electronics', zone: 'WALL-C', happinessBoost: 8, icon: '🎮', requires: 'tv' },
-  lava_lamp: { name: 'Lava Lamp', cost: 120, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 6, icon: '🫧' },
-  disco_ball: { name: 'Disco Ball', cost: 180, category: 'electronics', zone: 'CEILING', happinessBoost: 8, icon: '🪩' },
-  fish_tank: { name: 'Fish Tank', cost: 200, category: 'electronics', zone: 'FLOOR-L', happinessBoost: 10, icon: '🐠' },
+  radio: { name: 'Radio', cost: 100, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 5, icon: '📻', img: '/assets/radio.png' },
+  tv: { name: 'TV', cost: 250, category: 'electronics', zone: 'WALL-C', happinessBoost: 10, icon: '📺', img: '/assets/tv.png' },
+  gaming_console: { name: 'Gaming Console', cost: 200, category: 'electronics', zone: 'WALL-C', happinessBoost: 8, icon: '🎮', img: '/assets/gaming-console.png', requires: 'tv' },
+  lava_lamp: { name: 'Lava Lamp', cost: 120, category: 'electronics', zone: 'FLOOR-R', happinessBoost: 6, icon: '🫧', img: '/assets/lava-lamp.png' },
+  disco_ball: { name: 'Disco Ball', cost: 180, category: 'electronics', zone: 'CEILING', happinessBoost: 8, icon: '🪩', img: '/assets/disco-ball.png' },
+  fish_tank: { name: 'Fish Tank', cost: 200, category: 'electronics', zone: 'FLOOR-L', happinessBoost: 10, icon: '🐠', img: '/assets/fish-tank.png' },
 
   // --- Premium / Aspirational ---
-  ball_pit: { name: 'Ball Pit', cost: 400, category: 'premium', zone: 'FLOOR-C', happinessBoost: 15, icon: '🔴' },
-  tiny_trampoline: { name: 'Trampoline', cost: 350, category: 'premium', zone: 'FLOOR-R', happinessBoost: 12, icon: '🤸' },
-  skateboard_ramp: { name: 'Skate Ramp', cost: 300, category: 'premium', zone: 'FLOOR-L', happinessBoost: 12, icon: '🛹' },
+  ball_pit: { name: 'Ball Pit', cost: 400, category: 'premium', zone: 'FLOOR-C', happinessBoost: 15, icon: '🔴', img: '/assets/ball-pit.png' },
+  tiny_trampoline: { name: 'Trampoline', cost: 350, category: 'premium', zone: 'FLOOR-R', happinessBoost: 12, icon: '🤸', img: '/assets/tiny-trampoline.png' },
+  skateboard_ramp: { name: 'Skate Ramp', cost: 300, category: 'premium', zone: 'FLOOR-L', happinessBoost: 12, icon: '🛹', img: '/assets/skateboard-ramp.png' },
   ninja_dummy: { name: 'Ninja Dummy', cost: 350, category: 'premium', zone: 'FLOOR-L', happinessBoost: 12, icon: '🥊' },
   rocket_toy: { name: 'Rocket Ship', cost: 400, category: 'premium', zone: 'FLOOR-R', happinessBoost: 15, icon: '🚀' },
-  ninja_dojo_makeover: { name: 'Ninja Dojo!', cost: 800, category: 'premium', zone: 'FULL', happinessBoost: 25, icon: '⛩️' },
+  ninja_dojo_makeover: { name: 'Ninja Dojo!', cost: 800, category: 'premium', zone: 'FULL', happinessBoost: 25, icon: '⛩️', img: '/assets/ninja-dojo.png' },
 };
 
 const DEFAULT_STATE = {
@@ -1392,28 +1392,15 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
 
       {/* Fairy Lights */}
       {items.includes('fairy_lights') && (
-        <g>
-          <path d="M20,18 Q60,30 100,15 Q150,28 200,12 Q250,28 300,15 Q340,28 380,18" fill="none" stroke="#333" strokeWidth="1" />
-          {[50,100,150,200,250,300,350].map((x, i) => (
-            <circle key={i} cx={x} cy={15 + (i % 2) * 8} r="4" fill={['#ef4444','#fbbf24','#22c55e','#3b82f6','#a855f7','#ec4899','#f97316'][i]}
-              style={{ animation: `fairyPulse 2s ease-in-out ${i * 0.3}s infinite` }} />
-          ))}
-        </g>
+        <image href="/assets/fairy-lights.png" x="-10" y="-60" width="420" height="100" />
       )}
 
       {/* Hanging Plant */}
       {items.includes('hanging_plant') && (
-        <g>
-          <line x1="100" y1="0" x2="100" y2="20" stroke="#666" strokeWidth="1.5" />
-          <ellipse cx="100" cy="28" rx="12" ry="10" fill="#a0522d" stroke="#8b4513" strokeWidth="1.5" />
-          <ellipse cx="95" cy="22" rx="8" ry="6" fill="#22c55e" stroke="#16a34a" strokeWidth="1" />
-          <ellipse cx="105" cy="20" rx="6" ry="5" fill="#4ade80" stroke="#22c55e" strokeWidth="1" />
-          <path d="M92,25 Q85,35 88,42" fill="none" stroke="#22c55e" strokeWidth="1.5" />
-          <ellipse cx="88" cy="43" rx="4" ry="3" fill="#4ade80" />
-        </g>
+        <image href="/assets/hanging-plant.png" x="35" y="-30" width="155" height="100" />
       )}
 
-      {/* Banner */}
+      {/* Banner (no PNG — keep SVG) */}
       {items.includes('banner') && (
         <g>
           <line x1="130" y1="5" x2="270" y2="5" stroke="#92400e" strokeWidth="2" />
@@ -1427,114 +1414,65 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
 
       {/* Disco Ball */}
       {items.includes('disco_ball') && (
-        <g>
-          <line x1="200" y1="0" x2="200" y2="20" stroke="#9ca3af" strokeWidth="1.5" />
-          <circle cx="200" cy="30" r="12" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1.5" />
-          <rect x="194" y="22" width="4" height="4" rx="0.5" fill="#fff" opacity="0.6" />
-          <rect x="200" y="26" width="4" height="4" rx="0.5" fill="#fff" opacity="0.4" />
-          <rect x="196" y="30" width="3" height="3" rx="0.5" fill="#fff" opacity="0.5" />
-          <rect x="202" y="32" width="3" height="3" rx="0.5" fill="#fff" opacity="0.3" />
-          {/* Disco light rays */}
-          {[150,170,230,250].map((x, i) => (
-            <line key={i} x1="200" y1="30" x2={x} y2={80 + i * 15} stroke={['#ef4444','#3b82f6','#22c55e','#fbbf24'][i]}
-              strokeWidth="1" opacity="0.15" style={{ animation: `fairyPulse 3s ease-in-out ${i * 0.5}s infinite` }} />
-          ))}
-        </g>
+        <image href="/assets/disco-ball.png" x="158" y="-20" width="90" height="82" />
       )}
 
-      {/* ===== WALL-L ZONE (x: 25-100, y: 60-160) ===== */}
+      {/* ===== WALL-L ZONE ===== */}
 
       {/* Paw Poster */}
       {items.includes('paw_poster') && (
-        <g>
-          <rect x="30" y="60" width="55" height="70" rx="4" fill="#fff8e7" stroke="#c4956a" strokeWidth="2" />
-          <text x="57" y="105" fontSize="30" textAnchor="middle">🐾</text>
-        </g>
+        <image href="/assets/paw-poster.png" x="10" y="35" width="95" height="95" />
       )}
 
-      {/* Ninja Poster (replaces paw poster position if paw not owned) */}
+      {/* Ninja Poster */}
       {items.includes('ninja_poster') && !items.includes('paw_poster') && (
-        <g>
-          <rect x="30" y="60" width="55" height="70" rx="4" fill="#1f2937" stroke="#475569" strokeWidth="2" />
-          <text x="57" y="105" fontSize="28" textAnchor="middle">🥷</text>
-        </g>
+        <image href="/assets/ninja-poster.png" x="10" y="35" width="95" height="95" />
       )}
       {items.includes('ninja_poster') && items.includes('paw_poster') && (
-        <g>
-          <rect x="30" y="135" width="50" height="55" rx="4" fill="#1f2937" stroke="#475569" strokeWidth="2" />
-          <text x="55" y="170" fontSize="24" textAnchor="middle">🥷</text>
-        </g>
+        <image href="/assets/ninja-poster.png" x="10" y="110" width="85" height="85" />
       )}
 
-      {/* ===== WALL-C ZONE (x: 140-260, y: 50-140) ===== */}
+      {/* ===== WALL-C ZONE ===== */}
 
       {/* TV */}
       {items.includes('tv') && (
-        <g>
-          <rect x="150" y="55" width="100" height="65" rx="4" fill="#1e293b" stroke="#475569" strokeWidth="2.5" />
-          <rect x="156" y="60" width="88" height="52" rx="2" fill="#60a5fa" opacity="0.6" />
-          {/* TV stand */}
-          <rect x="190" y="120" width="20" height="8" rx="2" fill="#475569" />
-          <rect x="185" y="126" width="30" height="4" rx="2" fill="#475569" />
-          {/* Gaming console (below TV if owned) */}
-          {items.includes('gaming_console') && (
-            <g>
-              <rect x="180" y="132" width="40" height="14" rx="3" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
-              <circle cx="192" cy="139" r="2" fill="#22c55e" />
-              <rect x="200" y="136" width="12" height="3" rx="1" fill="#6b7280" />
-            </g>
-          )}
-        </g>
+        <image href="/assets/tv.png" x="120" y="10" width="165" height="148" />
+      )}
+      {/* Gaming Console */}
+      {items.includes('gaming_console') && items.includes('tv') && (
+        <image href="/assets/gaming-console.png" x="155" y="105" width="90" height="85" />
       )}
 
-      {/* ===== WALL-R ZONE (x: 300-380, y: 60-160) ===== */}
+      {/* ===== WALL-R ZONE ===== */}
 
       {/* Space Poster */}
       {items.includes('space_poster') && (
-        <g>
-          <rect x="310" y="60" width="55" height="70" rx="4" fill="#0f172a" stroke="#475569" strokeWidth="2" />
-          <circle cx="327" cy="85" r="6" fill="#fbbf24" />
-          <circle cx="345" cy="95" r="4" fill="#60a5fa" />
-          <circle cx="330" cy="105" r="2" fill="#fff" />
-          <circle cx="350" cy="80" r="1.5" fill="#fff" />
-          <text x="337" y="120" fontSize="10" textAnchor="middle" fill="#fff" opacity="0.7">🚀</text>
-        </g>
+        <image href="/assets/space-poster.png" x="300" y="35" width="95" height="95" />
       )}
 
-      {/* Clock */}
+      {/* Clock (no PNG — keep SVG) */}
       {items.includes('clock') && (
         <g>
-          <circle cx={items.includes('space_poster') ? 340 : 340} cy={items.includes('space_poster') ? 155 : 90} r="18" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
-          <circle cx={items.includes('space_poster') ? 340 : 340} cy={items.includes('space_poster') ? 155 : 90} r="15" fill="#fff8e7" />
-          <line x1={items.includes('space_poster') ? 340 : 340} y1={items.includes('space_poster') ? 155 : 90}
-            x2={items.includes('space_poster') ? 340 : 340} y2={items.includes('space_poster') ? 143 : 78} stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1={items.includes('space_poster') ? 340 : 340} y1={items.includes('space_poster') ? 155 : 90}
-            x2={items.includes('space_poster') ? 348 : 348} y2={items.includes('space_poster') ? 155 : 90} stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+          <circle cx={340} cy={items.includes('space_poster') ? 155 : 90} r="18" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+          <circle cx={340} cy={items.includes('space_poster') ? 155 : 90} r="15" fill="#fff8e7" />
+          <line x1={340} y1={items.includes('space_poster') ? 155 : 90}
+            x2={340} y2={items.includes('space_poster') ? 143 : 78} stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1={340} y1={items.includes('space_poster') ? 155 : 90}
+            x2={348} y2={items.includes('space_poster') ? 155 : 90} stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
         </g>
       )}
 
       {/* Picture Frame */}
       {items.includes('picture_frame') && (
-        <g>
-          <rect x="310" y={items.includes('space_poster') && items.includes('clock') ? 100 : items.includes('space_poster') ? 140 : 120} width="40" height="35" rx="3" fill="#d4a574" stroke="#92400e" strokeWidth="2" />
-          <rect x="315" y={items.includes('space_poster') && items.includes('clock') ? 105 : items.includes('space_poster') ? 145 : 125} width="30" height="25" rx="1" fill="#87ceeb" />
-          <circle cx="330" cy={items.includes('space_poster') && items.includes('clock') ? 115 : items.includes('space_poster') ? 155 : 135} r="5" fill="#fbbf24" />
-        </g>
+        <image href="/assets/picture-frame.png" x="305" y={items.includes('space_poster') && items.includes('clock') ? 80 : items.includes('space_poster') ? 120 : 95} width="70" height="70" />
       )}
 
       {/* Wall Shelf */}
       {items.includes('small_shelf') && (
-        <g>
-          <rect x="300" y="170" width="70" height="6" rx="2" fill="#a0785a" stroke="#8b6914" strokeWidth="1.5" />
-          <rect x="300" y="170" width="4" height="20" rx="1" fill="#a0785a" stroke="#8b6914" strokeWidth="1" />
-          <rect x="366" y="170" width="4" height="20" rx="1" fill="#a0785a" stroke="#8b6914" strokeWidth="1" />
-          {/* Little items on shelf */}
-          <circle cx="320" cy="166" r="5" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
-          <rect x="340" y="160" width="8" height="10" rx="1" fill="#3b82f6" stroke="#2563eb" strokeWidth="0.8" />
-        </g>
+        <image href="/assets/small-shelf.png" x="288" y="135" width="105" height="80" />
       )}
 
-      {/* ===== FLOOR-L ZONE (x: 20-120, y: 200-275) ===== */}
+      {/* ===== FLOOR-L ZONE ===== */}
 
       {/* Bean Bag / Armchair / Couch (upgrades replace) */}
       {items.includes('couch') ? (
@@ -1546,55 +1484,24 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
           <ellipse cx="85" cy="235" rx="16" ry="7" fill="#818cf8" opacity="0.4" />
         </g>
       ) : items.includes('armchair') ? (
-        <g>
-          <rect x="35" y="220" width="65" height="50" rx="10" fill="#b45309" stroke="#92400e" strokeWidth="2.5" />
-          <rect x="30" y="215" width="18" height="55" rx="7" fill="#d97706" stroke="#b45309" strokeWidth="1.5" />
-          <rect x="88" y="215" width="18" height="55" rx="7" fill="#d97706" stroke="#b45309" strokeWidth="1.5" />
-          <ellipse cx="67" cy="240" rx="18" ry="8" fill="#d97706" opacity="0.5" />
-        </g>
+        <image href="/assets/armchair.png" x="10" y="190" width="110" height="90" />
       ) : items.includes('bean_bag') ? (
-        <g>
-          <ellipse cx="65" cy="250" rx="35" ry="28" fill="#ec4899" stroke="#db2777" strokeWidth="2.5" />
-          <ellipse cx="60" cy="235" rx="20" ry="12" fill="#f472b6" opacity="0.5" />
-        </g>
+        <image href="/assets/bean-bag.png" x="10" y="195" width="105" height="85" />
       ) : null}
 
-      {/* Bookshelf (if no seating, or on top if seating exists) */}
+      {/* Bookshelf */}
       {items.includes('bookshelf') && (
-        <g transform={items.includes('couch') || items.includes('armchair') || items.includes('bean_bag') ? 'translate(0, 0)' : 'translate(0, 0)'}>
-          <rect x="25" y="130" width="50" height="65" rx="3" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
-          <line x1="28" y1="150" x2="72" y2="150" stroke="#8b6914" strokeWidth="1" />
-          <line x1="28" y1="170" x2="72" y2="170" stroke="#8b6914" strokeWidth="1" />
-          {/* Books */}
-          <rect x="30" y="133" width="8" height="15" rx="1" fill="#ef4444" />
-          <rect x="40" y="135" width="7" height="13" rx="1" fill="#3b82f6" />
-          <rect x="49" y="133" width="9" height="15" rx="1" fill="#22c55e" />
-          <rect x="60" y="136" width="6" height="12" rx="1" fill="#fbbf24" />
-          <rect x="30" y="153" width="10" height="15" rx="1" fill="#a855f7" />
-          <rect x="42" y="154" width="8" height="14" rx="1" fill="#ec4899" />
-          <rect x="52" y="153" width="7" height="15" rx="1" fill="#f97316" />
-        </g>
+        <image href="/assets/bookshelf.png" x="-8" y="55" width="110" height="170" />
       )}
 
       {/* Fish Tank */}
       {items.includes('fish_tank') && !items.includes('couch') && !items.includes('armchair') && (
-        <g>
-          <rect x="30" y="220" width="60" height="45" rx="4" fill="#bfdbfe" stroke="#60a5fa" strokeWidth="2" opacity="0.7" />
-          <rect x="28" y="216" width="64" height="6" rx="2" fill="#475569" />
-          <ellipse cx="50" cy="240" rx="6" ry="4" fill="#f97316" stroke="#ea580c" strokeWidth="0.8" />
-          <ellipse cx="70" cy="245" rx="5" ry="3" fill="#ef4444" stroke="#dc2626" strokeWidth="0.8" />
-          <ellipse cx="45" cy="255" rx="10" ry="3" fill="#22c55e" opacity="0.5" />
-          <circle cx="55" cy="230" r="2" fill="#fff" opacity="0.4" />
-          <circle cx="65" cy="235" r="1.5" fill="#fff" opacity="0.3" />
-        </g>
+        <image href="/assets/fish-tank.png" x="10" y="185" width="90" height="85" />
       )}
 
       {/* Skateboard Ramp */}
       {items.includes('skateboard_ramp') && !items.includes('couch') && !items.includes('armchair') && !items.includes('bean_bag') && (
-        <g>
-          <path d="M25,275 L25,230 Q60,230 100,260 L100,275 Z" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
-          <path d="M25,228 Q60,228 100,258" fill="none" stroke="#6b7280" strokeWidth="1.5" />
-        </g>
+        <image href="/assets/skateboard-ramp.png" x="5" y="195" width="115" height="82" />
       )}
 
       {/* Ninja Dummy */}
@@ -1608,24 +1515,18 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
         </g>
       )}
 
-      {/* ===== FLOOR-C ZONE (Puppy Area, x: 140-260, y: 200-280) ===== */}
+      {/* ===== FLOOR-C ZONE (Puppy Area) ===== */}
 
-      {/* Small/Large Rug (under puppy) */}
+      {/* Large Rug / Small Rug */}
       {items.includes('large_rug') ? (
-        <ellipse cx="200" cy="260" rx="70" ry="20" fill="#b91c1c" stroke="#991b1b" strokeWidth="2" opacity="0.7" />
+        <image href="/assets/large-rug.png" x="105" y="190" width="195" height="120" />
       ) : items.includes('small_rug') ? (
-        <ellipse cx="200" cy="260" rx="45" ry="14" fill="#92400e" stroke="#78350f" strokeWidth="1.5" opacity="0.6" />
+        <image href="/assets/small-rug.png" x="130" y="200" width="145" height="95" />
       ) : null}
 
       {/* Ball Pit */}
       {items.includes('ball_pit') && (
-        <g>
-          <rect x="155" y="245" width="90" height="30" rx="10" fill="#475569" stroke="#374151" strokeWidth="2" />
-          {[165,175,185,195,205,215,225,235].map((x, i) => (
-            <circle key={i} cx={x} cy={258 + (i % 2) * 5} r="6"
-              fill={['#ef4444','#3b82f6','#fbbf24','#22c55e','#a855f7','#ec4899','#f97316','#60a5fa'][i]} />
-          ))}
-        </g>
+        <image href="/assets/ball-pit.png" x="135" y="205" width="130" height="85" />
       )}
 
       {/* ===== PUPPY (centered) ===== */}
@@ -1633,53 +1534,30 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
         <PuppySVGInline pet={pet} isPetting={isPetting} />
       </g>
 
-      {/* ===== FLOOR-R ZONE (x: 280-385, y: 200-275) ===== */}
+      {/* ===== FLOOR-R ZONE ===== */}
 
       {/* Side Table */}
       {items.includes('side_table') && (
-        <g>
-          <rect x="310" y="230" width="50" height="40" rx="4" fill="#a0785a" stroke="#8b6914" strokeWidth="2" />
-          <rect x="305" y="226" width="60" height="6" rx="3" fill="#b8956a" stroke="#8b6914" strokeWidth="1.5" />
-          {/* Lamp on top */}
-          {items.includes('lamp') && (
-            <g>
-              <rect x="330" y="210" width="6" height="16" rx="2" fill="#d4a574" />
-              <polygon points="320,210 346,210 340,196 326,196" fill="#fef3c7" stroke="#d97706" strokeWidth="1" />
-              <circle cx="333" cy="203" r="3" fill="#fbbf24" opacity="0.6" style={{ animation: 'fairyPulse 3s ease-in-out infinite' }} />
-            </g>
-          )}
-        </g>
+        <image href="/assets/side-table.png" x="288" y="160" width="100" height="115" />
+      )}
+      {/* Lamp */}
+      {items.includes('lamp') && items.includes('side_table') && (
+        <image href="/assets/lamp.png" x="298" y="130" width="68" height="82" />
       )}
 
       {/* Radio */}
       {items.includes('radio') && (
-        <g>
-          <rect x={items.includes('side_table') ? 315 : 310} y={items.includes('side_table') ? 215 : 240} width="35" height="22" rx="4" fill="#475569" stroke="#374151" strokeWidth="1.5" />
-          <circle cx={items.includes('side_table') ? 325 : 320} cy={items.includes('side_table') ? 228 : 253} r="6" fill="#6b7280" stroke="#4b5563" strokeWidth="1" />
-          <rect x={items.includes('side_table') ? 340 : 335} y={items.includes('side_table') ? 220 : 245} width="6" height="3" rx="1" fill="#22c55e" />
-          <line x1={items.includes('side_table') ? 332 : 327} y1={items.includes('side_table') ? 215 : 240}
-            x2={items.includes('side_table') ? 342 : 337} y2={items.includes('side_table') ? 205 : 230} stroke="#9ca3af" strokeWidth="1" />
-        </g>
+        <image href="/assets/radio.png" x={items.includes('side_table') ? 298 : 300} y={items.includes('side_table') ? 170 : 218} width="55" height="55" />
       )}
 
       {/* Lava Lamp */}
       {items.includes('lava_lamp') && (
-        <g>
-          <rect x="370" y="255" width="14" height="6" rx="2" fill="#6b7280" />
-          <rect x="373" y="230" width="8" height="25" rx="4" fill="#7c3aed" stroke="#6d28d9" strokeWidth="1" opacity="0.8" />
-          <ellipse cx="377" cy="240" rx="3" ry="5" fill="#a855f7" opacity="0.6" style={{ animation: 'lavaFloat 4s ease-in-out infinite' }} />
-          <ellipse cx="377" cy="250" rx="2.5" ry="3" fill="#c084fc" opacity="0.5" style={{ animation: 'lavaFloat 4s ease-in-out 2s infinite' }} />
-        </g>
+        <image href="/assets/lava-lamp.png" x="342" y="178" width="60" height="85" />
       )}
 
       {/* Tiny Trampoline */}
       {items.includes('tiny_trampoline') && !items.includes('side_table') && (
-        <g>
-          <ellipse cx="340" cy="265" rx="30" ry="8" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-          <ellipse cx="340" cy="260" rx="25" ry="5" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
-          <line x1="315" y1="262" x2="315" y2="275" stroke="#475569" strokeWidth="2" />
-          <line x1="365" y1="262" x2="365" y2="275" stroke="#475569" strokeWidth="2" />
-        </g>
+        <image href="/assets/tiny-trampoline.png" x="293" y="218" width="88" height="62" />
       )}
 
       {/* Rocket Ship Toy */}
@@ -1693,68 +1571,45 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
         </g>
       )}
 
-      {/* ===== FRONT-L ZONE (x: 20-120, y: 270-295) ===== */}
+      {/* ===== FRONT-L ZONE ===== */}
 
-      {/* Food Bowl (existing item support) */}
+      {/* Food Bowl */}
       {pet.purchasedItems.includes('food_bowl') && (
-        <g>
-          <ellipse cx="60" cy="282" rx="18" ry="6" fill="#e85d4a" stroke="#c0392b" strokeWidth="1.5" />
-          <rect x="42" y="276" width="36" height="6" rx="2" fill="#e85d4a" stroke="#c0392b" strokeWidth="1.5" />
-          <ellipse cx="60" cy="276" rx="18" ry="5" fill="#f97316" stroke="#c0392b" strokeWidth="1" />
-          {/* Kibble */}
-          <circle cx="53" cy="274" r="2.5" fill="#8b5e3c" />
-          <circle cx="60" cy="273" r="2" fill="#a0785a" />
-          <circle cx="67" cy="274" r="2.5" fill="#8b5e3c" />
-        </g>
+        <image href="/assets/food-bowl.png" x="5" y="232" width="70" height="70" />
       )}
 
       {/* Water Bowl */}
       {pet.purchasedItems.includes('water_bowl') && (
-        <g>
-          <ellipse cx="105" cy="282" rx="16" ry="5" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
-          <rect x="89" y="277" width="32" height="5" rx="2" fill="#3b82f6" stroke="#2563eb" strokeWidth="1.5" />
-          <ellipse cx="105" cy="277" rx="16" ry="4.5" fill="#60a5fa" stroke="#2563eb" strokeWidth="1" />
-          <ellipse cx="102" cy="276" rx="4" ry="2" fill="#93c5fd" opacity="0.5" />
-        </g>
+        <image href="/assets/water-bowl.png" x="60" y="235" width="65" height="65" />
       )}
 
-      {/* ===== FRONT-R ZONE (x: 280-380, y: 270-295) ===== */}
+      {/* ===== FRONT-R ZONE ===== */}
 
       {/* Toy Basket */}
       {items.includes('toy_basket') && (
-        <g>
-          <rect x="320" y="270" width="40" height="22" rx="5" fill="#d4a574" stroke="#92400e" strokeWidth="1.5" />
-          <rect x="318" y="267" width="44" height="5" rx="2.5" fill="#b8956a" stroke="#92400e" strokeWidth="1" />
-          <circle cx="330" cy="278" r="5" fill="#ef4444" />
-          <circle cx="340" cy="280" r="4" fill="#3b82f6" />
-          <rect x="345" y="272" width="5" height="12" rx="1" fill="#22c55e" transform="rotate(15, 348, 278)" />
-        </g>
+        <image href="/assets/toy-basket.png" x="290" y="218" width="95" height="80" />
       )}
 
-      {/* Bed (existing item) */}
+      {/* Bed */}
       {pet.purchasedItems.includes('bed') && (
         <g>
-          <rect x="280" y="272" width="35" height="18" rx="6" fill="#7eb5d6" stroke="#5b9cc4" strokeWidth="1.5" />
-          <ellipse cx="297" cy="278" rx="12" ry="5" fill="#93c5fd" opacity="0.5" />
+          <image href="/assets/bed.png" x="238" y="225" width="88" height="72" />
           {pet.purchasedItems.includes('cozy_bed') && (
             <>
-              <ellipse cx="290" cy="272" rx="8" ry="4" fill="#fef3c7" stroke="#d97706" strokeWidth="0.8" />
-              <rect x="282" y="282" width="30" height="6" rx="2" fill="#fecaca" opacity="0.6" />
+              <ellipse cx="282" cy="240" rx="12" ry="6" fill="#fef3c7" stroke="#d97706" strokeWidth="0.8" />
+              <rect x="255" y="288" width="50" height="6" rx="2" fill="#fecaca" opacity="0.6" />
             </>
           )}
         </g>
       )}
 
-      {/* Toy Ball & Chew Rope (existing items, in front) */}
+      {/* Toy Ball */}
       {pet.purchasedItems.includes('toy_ball') && (
-        <circle cx="160" cy="285" r="8" fill="#ef4444" stroke="#dc2626" strokeWidth="1.5" />
+        <image href="/assets/toy-ball.png" x="130" y="255" width="48" height="46" />
       )}
+      {/* Chew Rope */}
       {pet.purchasedItems.includes('chew_rope') && (
-        <g>
-          <path d="M240,280 Q250,275 260,282 Q270,288 280,283" fill="none" stroke="#92400e" strokeWidth="4" strokeLinecap="round" />
-          <circle cx="240" cy="280" r="3" fill="#b45309" />
-          <circle cx="280" cy="283" r="3" fill="#b45309" />
-        </g>
+        <image href="/assets/chew-rope.png" x="208" y="248" width="75" height="55" />
       )}
     </svg>
   );
@@ -2092,7 +1947,7 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
     return 'available';
   };
 
-  const shopItemRow = (icon, name, effectText, status, isBuying, cost, onBuyFn) => (
+  const shopItemRow = (icon, name, effectText, status, isBuying, cost, onBuyFn, imgSrc) => (
     <div style={{
       display: 'flex',
       alignItems: 'center',
@@ -2104,7 +1959,11 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
       opacity: status === 'cantAfford' || status === 'locked' ? 0.5 : 1,
       transition: 'all 0.3s',
     }}>
-      <span style={{ fontSize: '28px' }}>{status === 'locked' ? '🔒' : icon}</span>
+      <span style={{ fontSize: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32 }}>
+        {status === 'locked' ? '🔒' : (
+          imgSrc ? <img src={imgSrc} alt={name} style={{ width: 32, height: 32, objectFit: 'contain' }} /> : icon
+        )}
+      </span>
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 700, fontSize: '15px' }}>{name}</div>
         <div style={{ fontSize: '12px', opacity: 0.7 }}>{effectText}</div>
@@ -2223,7 +2082,8 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
                     status,
                     isBuying,
                     item.cost,
-                    () => canBuy(itemId, item) && onBuy(itemId)
+                    () => canBuy(itemId, item) && onBuy(itemId),
+                    item.img
                   )}
                 </div>
               );
@@ -2247,7 +2107,8 @@ function ShopScreen({ gameState, onBuy, onBuyRoom, onBack, buyAnimation }) {
                     status,
                     isBuying,
                     item.cost,
-                    () => canBuyRoomItem(item) && onBuyRoom(item.id, item.type)
+                    () => canBuyRoomItem(item) && onBuyRoom(item.id, item.type),
+                    item.img
                   )}
                 </div>
               );
