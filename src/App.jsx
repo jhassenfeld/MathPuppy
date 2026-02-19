@@ -140,6 +140,65 @@ const ROOM_ITEMS = {
   ninja_dojo_makeover: { name: 'Ninja Dojo!', cost: 800, category: 'premium', zone: 'FULL', happinessBoost: 25, icon: '⛩️', img: '/assets/ninja-dojo.png' },
 };
 
+// Default positions for all draggable items in SVG viewBox coordinates (0-400 x, 0-300 y)
+const DEFAULT_ITEM_POSITIONS = {
+  // Ceiling
+  fairy_lights:    { x: -10,  y: -60, w: 420, h: 100 },
+  hanging_plant:   { x: 35,   y: -30, w: 155, h: 100 },
+  banner:          { x: 130,  y: 0,   w: 140, h: 30 },
+  disco_ball:      { x: 158,  y: -20, w: 90,  h: 82 },
+  // Wall-L
+  paw_poster:      { x: 10,   y: 35,  w: 95,  h: 95 },
+  ninja_poster:    { x: 10,   y: 35,  w: 95,  h: 95 },
+  // Wall-C
+  tv:              { x: 120,  y: 10,  w: 165, h: 148 },
+  gaming_console:  { x: 155,  y: 105, w: 90,  h: 85 },
+  // Wall-R
+  space_poster:    { x: 300,  y: 35,  w: 95,  h: 95 },
+  clock:           { x: 322,  y: 72,  w: 36,  h: 36 },
+  picture_frame:   { x: 305,  y: 95,  w: 70,  h: 70 },
+  small_shelf:     { x: 288,  y: 135, w: 105, h: 80 },
+  // Floor-L
+  bean_bag:        { x: 10,   y: 195, w: 105, h: 85 },
+  armchair:        { x: 10,   y: 190, w: 110, h: 90 },
+  couch:           { x: 20,   y: 210, w: 100, h: 60 },
+  bookshelf:       { x: -8,   y: 55,  w: 110, h: 170 },
+  fish_tank:       { x: 10,   y: 185, w: 90,  h: 85 },
+  skateboard_ramp: { x: 5,    y: 195, w: 115, h: 82 },
+  ninja_dummy:     { x: 70,   y: 220, w: 50,  h: 60 },
+  // Floor-C
+  small_rug:       { x: 130,  y: 200, w: 145, h: 95 },
+  large_rug:       { x: 105,  y: 190, w: 195, h: 120 },
+  ball_pit:        { x: 135,  y: 205, w: 130, h: 85 },
+  // Floor-R
+  side_table:      { x: 288,  y: 160, w: 100, h: 115 },
+  lamp:            { x: 298,  y: 130, w: 68,  h: 82 },
+  radio:           { x: 300,  y: 218, w: 55,  h: 55 },
+  lava_lamp:       { x: 342,  y: 178, w: 60,  h: 85 },
+  tiny_trampoline: { x: 293,  y: 218, w: 88,  h: 62 },
+  rocket_toy:      { x: 362,  y: 207, w: 30,  h: 60 },
+  // Front-L
+  food_bowl:       { x: 5,    y: 232, w: 70,  h: 70 },
+  water_bowl:      { x: 60,   y: 235, w: 65,  h: 65 },
+  // Front-R
+  toy_basket:      { x: 290,  y: 218, w: 95,  h: 80 },
+  bed:             { x: 238,  y: 225, w: 88,  h: 72 },
+  toy_ball:        { x: 130,  y: 255, w: 48,  h: 46 },
+  chew_rope:       { x: 208,  y: 248, w: 75,  h: 55 },
+  // Puppy
+  puppy:           { x: 200,  y: 235, w: 100, h: 100 },
+};
+
+function getItemPos(id, saved) {
+  if (saved && saved[id]) return saved[id];
+  const def = DEFAULT_ITEM_POSITIONS[id];
+  return def ? { x: def.x, y: def.y } : { x: 200, y: 200 };
+}
+
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
 const DEFAULT_STATE = {
   coins: 0,
   pet: {
@@ -154,6 +213,7 @@ const DEFAULT_STATE = {
     wallPaint: null,
     wallpaper: null,
     flooring: null,
+    itemPositions: {},
   },
   progress: {
     addSub20: { currentWave: 1, highScore: 0, bestStreak: 0 },
@@ -176,7 +236,7 @@ function loadState() {
         ...DEFAULT_STATE,
         ...parsed,
         pet: { ...DEFAULT_STATE.pet, ...parsed.pet },
-        room: { ...DEFAULT_STATE.room, ...(parsed.room || {}) },
+        room: { ...DEFAULT_STATE.room, ...(parsed.room || {}), itemPositions: { ...(parsed.room?.itemPositions || {}) } },
         progress: { ...DEFAULT_STATE.progress, ...parsed.progress },
       };
     }
@@ -1293,9 +1353,12 @@ function MeterBar({ label, value, color }) {
 }
 
 // --- Puppy Room (SVG Scene) ---
-function PuppyRoom({ room, pet, onPet, isPetting = false }) {
+function PuppyRoom({ room, pet, onPet, isPetting = false, onDragEnd }) {
   const items = room.purchasedItems || [];
   const isDojo = items.includes('ninja_dojo_makeover');
+  const saved = room.itemPositions || {};
+  const svgRef = useRef(null);
+  const [dragState, setDragState] = useState(null);
 
   // Wall color
   const wallColor = isDojo ? '#2d1810'
@@ -1310,8 +1373,89 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
   const floorPattern = isDojo ? 'tatami' : room.flooring ? (FLOOR_OPTIONS[room.flooring]?.pattern || null) : null;
   const wallpaperPattern = isDojo ? null : room.wallpaper ? (WALLPAPERS[room.wallpaper]?.pattern || null) : null;
 
+  // Convert screen coordinates to SVG viewBox coordinates
+  const screenToSVG = (clientX, clientY) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: svgPt.x, y: svgPt.y };
+  };
+
+  // Get resolved position for an item (drag-in-progress or saved/default)
+  const pos = (id) => {
+    if (dragState?.itemId === id && dragState.isDragging) {
+      const dx = dragState.currentSVG.x - dragState.startSVG.x;
+      const dy = dragState.currentSVG.y - dragState.startSVG.y;
+      return { x: dragState.origPos.x + dx, y: dragState.origPos.y + dy };
+    }
+    return getItemPos(id, saved);
+  };
+
+  const handlePointerDown = (e, itemId) => {
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const svgPt = screenToSVG(e.clientX, e.clientY);
+    setDragState({
+      itemId,
+      startSVG: svgPt,
+      currentSVG: svgPt,
+      origPos: getItemPos(itemId, saved),
+      isDragging: false,
+    });
+  };
+
+  const handlePointerMove = (e) => {
+    if (!dragState) return;
+    const svgPt = screenToSVG(e.clientX, e.clientY);
+    const dx = svgPt.x - dragState.startSVG.x;
+    const dy = svgPt.y - dragState.startSVG.y;
+    const isDragging = dragState.isDragging || Math.sqrt(dx * dx + dy * dy) > 5;
+    setDragState(prev => ({ ...prev, currentSVG: svgPt, isDragging }));
+  };
+
+  const handlePointerUp = () => {
+    if (!dragState) return;
+    if (dragState.isDragging && onDragEnd) {
+      const dx = dragState.currentSVG.x - dragState.startSVG.x;
+      const dy = dragState.currentSVG.y - dragState.startSVG.y;
+      const newX = clamp(dragState.origPos.x + dx, -20, 380);
+      const newY = clamp(dragState.origPos.y + dy, -20, 280);
+      onDragEnd(dragState.itemId, { x: newX, y: newY });
+    } else if (!dragState.isDragging && dragState.itemId === 'puppy') {
+      onPet();
+    }
+    setDragState(null);
+  };
+
+  // Helper: render a draggable item. source='room' or 'pet' determines which list to check.
+  const D = (id, renderFn, { source = 'room', condition = true } = {}) => {
+    const list = source === 'pet' ? pet.purchasedItems : items;
+    if (!list.includes(id) || !condition) return null;
+    const p = pos(id);
+    const dragging = dragState?.itemId === id && dragState.isDragging;
+    return (
+      <g key={id} onPointerDown={(e) => handlePointerDown(e, id)}
+        style={{ cursor: dragging ? 'grabbing' : 'grab' }}
+        opacity={dragging ? 0.8 : 1}>
+        {renderFn(p)}
+      </g>
+    );
+  };
+
+  // Helper for SVG-group items: offset the group by delta from default position
+  const svgGroupPos = (id) => {
+    const p = pos(id);
+    const def = DEFAULT_ITEM_POSITIONS[id];
+    return { dx: p.x - def.x, dy: p.y - def.y };
+  };
+
   return (
-    <svg viewBox="0 0 400 300" style={{ width: '100%', maxWidth: '420px', borderRadius: '18px', overflow: 'hidden', display: 'block' }}>
+    <svg ref={svgRef} viewBox="0 0 400 300"
+      onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}
+      style={{ width: '100%', maxWidth: '420px', borderRadius: '18px', overflow: 'hidden', display: 'block', touchAction: 'none' }}>
       <defs>
         {/* Floor patterns */}
         <pattern id="checkered" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -1369,12 +1513,9 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
       {/* Dojo decoration */}
       {isDojo && (
         <g>
-          {/* Bamboo wall panels */}
           <rect x="5" y="10" width="12" height="185" rx="3" fill="#6b8e4e" opacity="0.4" />
           <rect x="383" y="10" width="12" height="185" rx="3" fill="#6b8e4e" opacity="0.4" />
-          {/* Red sun */}
           <circle cx="200" cy="60" r="35" fill="#dc2626" opacity="0.2" />
-          {/* Paper lanterns */}
           <g>
             <line x1="80" y1="0" x2="80" y2="25" stroke="#a16207" strokeWidth="1" />
             <ellipse cx="80" cy="30" rx="10" ry="12" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
@@ -1389,228 +1530,138 @@ function PuppyRoom({ room, pet, onPet, isPetting = false }) {
       )}
 
       {/* ===== CEILING ZONE ===== */}
-
-      {/* Fairy Lights */}
-      {items.includes('fairy_lights') && (
-        <image href="/assets/fairy-lights.png" x="-10" y="-60" width="420" height="100" />
-      )}
-
-      {/* Hanging Plant */}
-      {items.includes('hanging_plant') && (
-        <image href="/assets/hanging-plant.png" x="35" y="-30" width="155" height="100" />
-      )}
-
-      {/* Banner (no PNG — keep SVG) */}
-      {items.includes('banner') && (
-        <g>
-          <line x1="130" y1="5" x2="270" y2="5" stroke="#92400e" strokeWidth="2" />
-          {[140,160,180,200,220,240,260].map((x, i) => (
-            <polygon key={i} points={`${x-8},8 ${x+8},8 ${x},28`}
-              fill={['#ef4444','#f97316','#fbbf24','#22c55e','#3b82f6','#a855f7','#ec4899'][i]}
-              stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
-          ))}
-        </g>
-      )}
-
-      {/* Disco Ball */}
-      {items.includes('disco_ball') && (
-        <image href="/assets/disco-ball.png" x="158" y="-20" width="90" height="82" />
-      )}
+      {D('fairy_lights', (p) => <image href="/assets/fairy-lights.png" x={p.x} y={p.y} width="420" height="100" />)}
+      {D('hanging_plant', (p) => <image href="/assets/hanging-plant.png" x={p.x} y={p.y} width="155" height="100" />)}
+      {D('banner', (p) => {
+        const d = svgGroupPos('banner');
+        return (
+          <g transform={`translate(${d.dx}, ${d.dy})`}>
+            <line x1="130" y1="5" x2="270" y2="5" stroke="#92400e" strokeWidth="2" />
+            {[140,160,180,200,220,240,260].map((x, i) => (
+              <polygon key={i} points={`${x-8},8 ${x+8},8 ${x},28`}
+                fill={['#ef4444','#f97316','#fbbf24','#22c55e','#3b82f6','#a855f7','#ec4899'][i]}
+                stroke="rgba(0,0,0,0.1)" strokeWidth="0.5" />
+            ))}
+          </g>
+        );
+      })}
+      {D('disco_ball', (p) => <image href="/assets/disco-ball.png" x={p.x} y={p.y} width="90" height="82" />)}
 
       {/* ===== WALL-L ZONE ===== */}
-
-      {/* Paw Poster */}
-      {items.includes('paw_poster') && (
-        <image href="/assets/paw-poster.png" x="10" y="35" width="95" height="95" />
-      )}
-
-      {/* Ninja Poster */}
-      {items.includes('ninja_poster') && !items.includes('paw_poster') && (
-        <image href="/assets/ninja-poster.png" x="10" y="35" width="95" height="95" />
-      )}
-      {items.includes('ninja_poster') && items.includes('paw_poster') && (
-        <image href="/assets/ninja-poster.png" x="10" y="110" width="85" height="85" />
-      )}
+      {D('paw_poster', (p) => <image href="/assets/paw-poster.png" x={p.x} y={p.y} width="95" height="95" />)}
+      {D('ninja_poster', (p) => <image href="/assets/ninja-poster.png" x={p.x} y={p.y} width="95" height="95" />)}
 
       {/* ===== WALL-C ZONE ===== */}
-
-      {/* TV */}
-      {items.includes('tv') && (
-        <image href="/assets/tv.png" x="120" y="10" width="165" height="148" />
-      )}
-      {/* Gaming Console */}
-      {items.includes('gaming_console') && items.includes('tv') && (
-        <image href="/assets/gaming-console.png" x="155" y="105" width="90" height="85" />
-      )}
+      {D('tv', (p) => <image href="/assets/tv.png" x={p.x} y={p.y} width="165" height="148" />)}
+      {D('gaming_console', (p) => <image href="/assets/gaming-console.png" x={p.x} y={p.y} width="90" height="85" />)}
 
       {/* ===== WALL-R ZONE ===== */}
-
-      {/* Space Poster */}
-      {items.includes('space_poster') && (
-        <image href="/assets/space-poster.png" x="300" y="35" width="95" height="95" />
-      )}
-
-      {/* Clock (no PNG — keep SVG) */}
-      {items.includes('clock') && (
-        <g>
-          <circle cx={340} cy={items.includes('space_poster') ? 155 : 90} r="18" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
-          <circle cx={340} cy={items.includes('space_poster') ? 155 : 90} r="15" fill="#fff8e7" />
-          <line x1={340} y1={items.includes('space_poster') ? 155 : 90}
-            x2={340} y2={items.includes('space_poster') ? 143 : 78} stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1={340} y1={items.includes('space_poster') ? 155 : 90}
-            x2={348} y2={items.includes('space_poster') ? 155 : 90} stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
-        </g>
-      )}
-
-      {/* Picture Frame */}
-      {items.includes('picture_frame') && (
-        <image href="/assets/picture-frame.png" x="305" y={items.includes('space_poster') && items.includes('clock') ? 80 : items.includes('space_poster') ? 120 : 95} width="70" height="70" />
-      )}
-
-      {/* Wall Shelf */}
-      {items.includes('small_shelf') && (
-        <image href="/assets/small-shelf.png" x="288" y="135" width="105" height="80" />
-      )}
+      {D('space_poster', (p) => <image href="/assets/space-poster.png" x={p.x} y={p.y} width="95" height="95" />)}
+      {D('clock', (p) => {
+        const d = svgGroupPos('clock');
+        return (
+          <g transform={`translate(${d.dx}, ${d.dy})`}>
+            <circle cx="340" cy="90" r="18" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+            <circle cx="340" cy="90" r="15" fill="#fff8e7" />
+            <line x1="340" y1="90" x2="340" y2="78" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="340" y1="90" x2="348" y2="90" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+          </g>
+        );
+      })}
+      {D('picture_frame', (p) => <image href="/assets/picture-frame.png" x={p.x} y={p.y} width="70" height="70" />)}
+      {D('small_shelf', (p) => <image href="/assets/small-shelf.png" x={p.x} y={p.y} width="105" height="80" />)}
 
       {/* ===== FLOOR-L ZONE ===== */}
+      {D('couch', (p) => {
+        const d = svgGroupPos('couch');
+        return (
+          <g transform={`translate(${d.dx}, ${d.dy})`}>
+            <rect x="20" y="215" width="100" height="50" rx="12" fill="#6366f1" stroke="#4f46e5" strokeWidth="2.5" />
+            <rect x="24" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
+            <rect x="94" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
+            <ellipse cx="55" cy="235" rx="20" ry="8" fill="#818cf8" opacity="0.5" />
+            <ellipse cx="85" cy="235" rx="16" ry="7" fill="#818cf8" opacity="0.4" />
+          </g>
+        );
+      })}
+      {D('armchair', (p) => <image href="/assets/armchair.png" x={p.x} y={p.y} width="110" height="90" />, { condition: !items.includes('couch') })}
+      {D('bean_bag', (p) => <image href="/assets/bean-bag.png" x={p.x} y={p.y} width="105" height="85" />, { condition: !items.includes('couch') && !items.includes('armchair') })}
+      {D('bookshelf', (p) => <image href="/assets/bookshelf.png" x={p.x} y={p.y} width="110" height="170" />)}
+      {D('fish_tank', (p) => <image href="/assets/fish-tank.png" x={p.x} y={p.y} width="90" height="85" />)}
+      {D('skateboard_ramp', (p) => <image href="/assets/skateboard-ramp.png" x={p.x} y={p.y} width="115" height="82" />)}
+      {D('ninja_dummy', (p) => {
+        const d = svgGroupPos('ninja_dummy');
+        return (
+          <g transform={`translate(${d.dx}, ${d.dy})`}>
+            <rect x="70" y="230" width="8" height="45" rx="2" fill="#92400e" />
+            <circle cx="74" cy="225" r="12" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+            <circle cx="70" cy="222" r="2" fill="#1e293b" />
+            <circle cx="78" cy="222" r="2" fill="#1e293b" />
+            <rect x="68" y="230" width="12" height="3" rx="1" fill="#dc2626" />
+          </g>
+        );
+      })}
 
-      {/* Bean Bag / Armchair / Couch (upgrades replace) */}
-      {items.includes('couch') ? (
-        <g>
-          <rect x="20" y="215" width="100" height="50" rx="12" fill="#6366f1" stroke="#4f46e5" strokeWidth="2.5" />
-          <rect x="24" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
-          <rect x="94" y="210" width="22" height="55" rx="8" fill="#818cf8" stroke="#6366f1" strokeWidth="1.5" />
-          <ellipse cx="55" cy="235" rx="20" ry="8" fill="#818cf8" opacity="0.5" />
-          <ellipse cx="85" cy="235" rx="16" ry="7" fill="#818cf8" opacity="0.4" />
-        </g>
-      ) : items.includes('armchair') ? (
-        <image href="/assets/armchair.png" x="10" y="190" width="110" height="90" />
-      ) : items.includes('bean_bag') ? (
-        <image href="/assets/bean-bag.png" x="10" y="195" width="105" height="85" />
-      ) : null}
+      {/* ===== FLOOR-C ZONE ===== */}
+      {D('large_rug', (p) => <image href="/assets/large-rug.png" x={p.x} y={p.y} width="195" height="120" />)}
+      {D('small_rug', (p) => <image href="/assets/small-rug.png" x={p.x} y={p.y} width="145" height="95" />, { condition: !items.includes('large_rug') })}
+      {D('ball_pit', (p) => <image href="/assets/ball-pit.png" x={p.x} y={p.y} width="130" height="85" />)}
 
-      {/* Bookshelf */}
-      {items.includes('bookshelf') && (
-        <image href="/assets/bookshelf.png" x="-8" y="55" width="110" height="170" />
-      )}
-
-      {/* Fish Tank */}
-      {items.includes('fish_tank') && !items.includes('couch') && !items.includes('armchair') && (
-        <image href="/assets/fish-tank.png" x="10" y="185" width="90" height="85" />
-      )}
-
-      {/* Skateboard Ramp */}
-      {items.includes('skateboard_ramp') && !items.includes('couch') && !items.includes('armchair') && !items.includes('bean_bag') && (
-        <image href="/assets/skateboard-ramp.png" x="5" y="195" width="115" height="82" />
-      )}
-
-      {/* Ninja Dummy */}
-      {items.includes('ninja_dummy') && (
-        <g transform={items.includes('couch') || items.includes('armchair') || items.includes('bean_bag') ? 'translate(115, 0)' : 'translate(50, 0)'}>
-          <rect x="20" y="230" width="8" height="45" rx="2" fill="#92400e" />
-          <circle cx="24" cy="225" r="12" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
-          <circle cx="20" cy="222" r="2" fill="#1e293b" />
-          <circle cx="28" cy="222" r="2" fill="#1e293b" />
-          <rect x="18" y="230" width="12" height="3" rx="1" fill="#dc2626" />
-        </g>
-      )}
-
-      {/* ===== FLOOR-C ZONE (Puppy Area) ===== */}
-
-      {/* Large Rug / Small Rug */}
-      {items.includes('large_rug') ? (
-        <image href="/assets/large-rug.png" x="105" y="190" width="195" height="120" />
-      ) : items.includes('small_rug') ? (
-        <image href="/assets/small-rug.png" x="130" y="200" width="145" height="95" />
-      ) : null}
-
-      {/* Ball Pit */}
-      {items.includes('ball_pit') && (
-        <image href="/assets/ball-pit.png" x="135" y="205" width="130" height="85" />
-      )}
-
-      {/* ===== PUPPY (centered) ===== */}
-      <g transform="translate(200, 235)">
-        <PuppySVGInline pet={pet} isPetting={isPetting} />
-      </g>
+      {/* ===== PUPPY ===== */}
+      {(() => {
+        const p = pos('puppy');
+        const dragging = dragState?.itemId === 'puppy' && dragState.isDragging;
+        return (
+          <g onPointerDown={(e) => handlePointerDown(e, 'puppy')}
+            style={{ cursor: dragging ? 'grabbing' : 'grab' }}
+            opacity={dragging ? 0.8 : 1}>
+            <g transform={`translate(${p.x}, ${p.y})`}>
+              <PuppySVGInline pet={pet} isPetting={isPetting} />
+            </g>
+          </g>
+        );
+      })()}
 
       {/* ===== FLOOR-R ZONE ===== */}
-
-      {/* Side Table */}
-      {items.includes('side_table') && (
-        <image href="/assets/side-table.png" x="288" y="160" width="100" height="115" />
-      )}
-      {/* Lamp */}
-      {items.includes('lamp') && items.includes('side_table') && (
-        <image href="/assets/lamp.png" x="298" y="130" width="68" height="82" />
-      )}
-
-      {/* Radio */}
-      {items.includes('radio') && (
-        <image href="/assets/radio.png" x={items.includes('side_table') ? 298 : 300} y={items.includes('side_table') ? 170 : 218} width="55" height="55" />
-      )}
-
-      {/* Lava Lamp */}
-      {items.includes('lava_lamp') && (
-        <image href="/assets/lava-lamp.png" x="342" y="178" width="60" height="85" />
-      )}
-
-      {/* Tiny Trampoline */}
-      {items.includes('tiny_trampoline') && !items.includes('side_table') && (
-        <image href="/assets/tiny-trampoline.png" x="293" y="218" width="88" height="62" />
-      )}
-
-      {/* Rocket Ship Toy */}
-      {items.includes('rocket_toy') && (
-        <g transform="translate(370, 215)">
-          <rect x="-8" y="0" width="16" height="40" rx="6" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1.5" />
-          <polygon points="-8,40 -14,50 8,40" fill="#ef4444" />
-          <polygon points="8,40 14,50 -8,40" fill="#ef4444" />
-          <polygon points="0,-8 -6,5 6,5" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
-          <circle cx="0" cy="18" r="5" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
-        </g>
-      )}
+      {D('side_table', (p) => <image href="/assets/side-table.png" x={p.x} y={p.y} width="100" height="115" />)}
+      {D('lamp', (p) => <image href="/assets/lamp.png" x={p.x} y={p.y} width="68" height="82" />)}
+      {D('radio', (p) => <image href="/assets/radio.png" x={p.x} y={p.y} width="55" height="55" />)}
+      {D('lava_lamp', (p) => <image href="/assets/lava-lamp.png" x={p.x} y={p.y} width="60" height="85" />)}
+      {D('tiny_trampoline', (p) => <image href="/assets/tiny-trampoline.png" x={p.x} y={p.y} width="88" height="62" />)}
+      {D('rocket_toy', (p) => {
+        const d = svgGroupPos('rocket_toy');
+        return (
+          <g transform={`translate(${d.dx}, ${d.dy})`}>
+            <g transform="translate(370, 215)">
+              <rect x="-8" y="0" width="16" height="40" rx="6" fill="#d1d5db" stroke="#9ca3af" strokeWidth="1.5" />
+              <polygon points="-8,40 -14,50 8,40" fill="#ef4444" />
+              <polygon points="8,40 14,50 -8,40" fill="#ef4444" />
+              <polygon points="0,-8 -6,5 6,5" fill="#ef4444" stroke="#dc2626" strokeWidth="1" />
+              <circle cx="0" cy="18" r="5" fill="#60a5fa" stroke="#3b82f6" strokeWidth="1" />
+            </g>
+          </g>
+        );
+      })}
 
       {/* ===== FRONT-L ZONE ===== */}
-
-      {/* Food Bowl */}
-      {pet.purchasedItems.includes('food_bowl') && (
-        <image href="/assets/food-bowl.png" x="5" y="232" width="70" height="70" />
-      )}
-
-      {/* Water Bowl */}
-      {pet.purchasedItems.includes('water_bowl') && (
-        <image href="/assets/water-bowl.png" x="60" y="235" width="65" height="65" />
-      )}
+      {D('food_bowl', (p) => <image href="/assets/food-bowl.png" x={p.x} y={p.y} width="70" height="70" />, { source: 'pet' })}
+      {D('water_bowl', (p) => <image href="/assets/water-bowl.png" x={p.x} y={p.y} width="65" height="65" />, { source: 'pet' })}
 
       {/* ===== FRONT-R ZONE ===== */}
-
-      {/* Toy Basket */}
-      {items.includes('toy_basket') && (
-        <image href="/assets/toy-basket.png" x="290" y="218" width="95" height="80" />
-      )}
-
-      {/* Bed */}
-      {pet.purchasedItems.includes('bed') && (
+      {D('toy_basket', (p) => <image href="/assets/toy-basket.png" x={p.x} y={p.y} width="95" height="80" />)}
+      {D('bed', (p) => (
         <g>
-          <image href="/assets/bed.png" x="238" y="225" width="88" height="72" />
+          <image href="/assets/bed.png" x={p.x} y={p.y} width="88" height="72" />
           {pet.purchasedItems.includes('cozy_bed') && (
             <>
-              <ellipse cx="282" cy="240" rx="12" ry="6" fill="#fef3c7" stroke="#d97706" strokeWidth="0.8" />
-              <rect x="255" y="288" width="50" height="6" rx="2" fill="#fecaca" opacity="0.6" />
+              <ellipse cx={p.x + 44} cy={p.y + 15} rx="12" ry="6" fill="#fef3c7" stroke="#d97706" strokeWidth="0.8" />
+              <rect x={p.x + 17} y={p.y + 63} width="50" height="6" rx="2" fill="#fecaca" opacity="0.6" />
             </>
           )}
         </g>
-      )}
-
-      {/* Toy Ball */}
-      {pet.purchasedItems.includes('toy_ball') && (
-        <image href="/assets/toy-ball.png" x="130" y="255" width="48" height="46" />
-      )}
-      {/* Chew Rope */}
-      {pet.purchasedItems.includes('chew_rope') && (
-        <image href="/assets/chew-rope.png" x="208" y="248" width="75" height="55" />
-      )}
+      ), { source: 'pet' })}
+      {D('toy_ball', (p) => <image href="/assets/toy-ball.png" x={p.x} y={p.y} width="48" height="46" />, { source: 'pet' })}
+      {D('chew_rope', (p) => <image href="/assets/chew-rope.png" x={p.x} y={p.y} width="75" height="55" />, { source: 'pet' })}
     </svg>
   );
 }
@@ -1693,6 +1744,21 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
     setTimeout(() => {
       setHearts(prev => prev.filter(h => !newHearts.find(nh => nh.id === h.id)));
     }, 1500);
+  };
+
+  const handleDragEnd = (itemId, newPos) => {
+    const newState = {
+      ...gameState,
+      room: {
+        ...gameState.room,
+        itemPositions: {
+          ...(gameState.room.itemPositions || {}),
+          [itemId]: { x: newPos.x, y: newPos.y },
+        },
+      },
+    };
+    setGameState(newState);
+    saveState(newState);
   };
 
   const handleBuy = (itemId) => {
@@ -1827,9 +1893,8 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
         </div>
 
         {/* Puppy Room (SVG Scene) */}
-        <div onClick={handlePetPuppy} style={{
-          cursor: 'pointer', width: '100%', maxWidth: '420px', margin: '10px 0', position: 'relative',
-          animation: 'none',
+        <div style={{
+          width: '100%', maxWidth: '420px', margin: '10px 0', position: 'relative',
         }}>
           {/* Floating hearts */}
           {hearts.map(h => (
@@ -1844,9 +1909,9 @@ function PuppyHomeScreen({ gameState, setGameState, onBack, onPlay }) {
               zIndex: 20,
             }}>❤️</div>
           ))}
-          <PuppyRoom room={gameState.room} pet={gameState.pet} onPet={handlePetPuppy} isPetting={isPetting} />
+          <PuppyRoom room={gameState.room} pet={gameState.pet} onPet={handlePetPuppy} isPetting={isPetting} onDragEnd={handleDragEnd} />
           <div style={{ textAlign: 'center', fontSize: '13px', opacity: 0.5, marginTop: '4px' }}>
-            Tap me! 👆
+            Tap puppy to pet! Drag to rearrange! 👆
           </div>
         </div>
 
